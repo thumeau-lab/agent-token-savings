@@ -1,0 +1,26 @@
+sessions with usage  : 784
+cache_creation total :   24,776,679
+cache_read total     :  175,813,137
+uncached input       :    2,066,014
+output               :    1,619,738
+hit rate cache       :       87.6%
+
+-- shape of the 10 sessions writing the most --
+   C=write >2k   .=small write   _=read only
+session-01                 n= 56 create=2,285,376 read=10,076,876 CCCCCCCCCC..CCCCCC__________CCCCCCCCCCCCCCCCCCCCCCCCCC__
+session-02                 n= 12 create=  582,800 read= 2,477,791 CCCCCCCCCCCC
+session-03                 n= 66 create=  484,841 read= 2,543,618 CCCCCCCCCCCCCCCC..CCCCCCCCCCCCCCCCCC....CC..CCCCCC.CCC......
+session-04                 n= 46 create=  481,592 read= 6,206,512 CCCCCC..CCCCCCCC..CC.C.CCCCC..CC.C.C.C.CCC..CC
+session-05                 n= 14 create=  393,885 read= 2,310,228 CCCCCCCC..CCCC
+session-06                 n= 16 create=  376,873 read= 2,199,435 CCCCCCCCCCCCCCCC
+session-07                 n= 20 create=  316,435 read= 5,292,956 ______CCCCCC..CCCCCC
+session-08                 n= 40 create=  315,298 read=12,303,857 CCCC..CC..CCCC..CCCCCCCCCC..CC........CC
+session-09                 n=  8 create=  309,076 read=   598,321 CCCCCCCC
+session-10                 n=  8 create=  301,874 read=   414,986 CCCCCCCC
+
+-- 'resume' signature (warm context, then create>10,000 with read=0) --
+cold first call (normal)   : 58/784
+warm rebuilds (abnormal)   : 3/784
+  session-11                       msg#4   create=167,886
+  session-12                       msg#4   create=98,561
+  session-13                       msg#2   create=62,971

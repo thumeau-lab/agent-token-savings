@@ -1,0 +1,3 @@
+first differing block: messages[0].0 user (block 33/39), ~22,637 characters rewritten from here
+same blocks, different order: sources injected in a non-deterministic order (parallel hooks?)
+identical prefix over 39 blocks: nothing to rewrite

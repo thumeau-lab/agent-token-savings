@@ -1,0 +1,30 @@
+{
+ "repo": "hermes-agent",
+ "rows": [
+  {
+   "cmd": "git status",
+   "raw": 2402,
+   "rtk": 1370
+  },
+  {
+   "cmd": "git log -n 30",
+   "raw": 23642,
+   "rtk": 9252
+  },
+  {
+   "cmd": "git diff HEAD~3 --stat",
+   "raw": 2539,
+   "rtk": 2538
+  },
+  {
+   "cmd": "ls -la",
+   "raw": 9265,
+   "rtk": 3659
+  },
+  {
+   "cmd": "find . -name '*.py' -maxdepth 3",
+   "raw": 320299,
+   "rtk": 1133
+  }
+ ]
+}

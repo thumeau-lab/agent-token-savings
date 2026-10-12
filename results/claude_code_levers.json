@@ -1,0 +1,160 @@
+{
+ "model": "haiku",
+ "prompt": "Reply with the single word: ok",
+ "variants": {
+  "default": [
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 10604,
+    "read": 17748,
+    "output": 173,
+    "prompt": 28362,
+    "ttl_1h": 10604,
+    "cost_usd": 0.023857800000000002
+   },
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 6566,
+    "read": 21786,
+    "output": 89,
+    "prompt": 28362,
+    "ttl_1h": 6566,
+    "cost_usd": 0.0157656
+   }
+  ],
+  "no_prompt_caching": [
+   {
+    "is_error": false,
+    "input": 28362,
+    "create": 0,
+    "read": 0,
+    "output": 136,
+    "prompt": 28362,
+    "ttl_1h": 0,
+    "cost_usd": 0.029042
+   },
+   {
+    "is_error": false,
+    "input": 28362,
+    "create": 0,
+    "read": 0,
+    "output": 78,
+    "prompt": 28362,
+    "ttl_1h": 0,
+    "cost_usd": 0.028752
+   }
+  ],
+  "no_builtin_tools": [
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 9062,
+    "read": 0,
+    "output": 157,
+    "prompt": 9072,
+    "ttl_1h": 9062,
+    "cost_usd": 0.018919000000000002
+   },
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 0,
+    "read": 9062,
+    "output": 205,
+    "prompt": 9072,
+    "ttl_1h": 0,
+    "cost_usd": 0.0019412000000000001
+   }
+  ],
+  "no_skills": [
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 8450,
+    "read": 17281,
+    "output": 53,
+    "prompt": 25741,
+    "ttl_1h": 8450,
+    "cost_usd": 0.0189031
+   },
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 0,
+    "read": 25731,
+    "output": 110,
+    "prompt": 25741,
+    "ttl_1h": 0,
+    "cost_usd": 0.0031331
+   }
+  ],
+  "strict_mcp_none": [
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 0,
+    "read": 28352,
+    "output": 66,
+    "prompt": 28362,
+    "ttl_1h": 0,
+    "cost_usd": 0.0031752
+   },
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 0,
+    "read": 28352,
+    "output": 56,
+    "prompt": 28362,
+    "ttl_1h": 0,
+    "cost_usd": 0.0031252
+   }
+  ],
+  "no_user_settings": [
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 2515,
+    "read": 21786,
+    "output": 42,
+    "prompt": 24311,
+    "ttl_1h": 2515,
+    "cost_usd": 0.0080116
+   },
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 0,
+    "read": 24301,
+    "output": 38,
+    "prompt": 24311,
+    "ttl_1h": 0,
+    "cost_usd": 0.0032181
+   }
+  ],
+  "exclude_dynamic_sections": [
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 7478,
+    "read": 20680,
+    "output": 44,
+    "prompt": 28168,
+    "ttl_1h": 7478,
+    "cost_usd": 0.017254000000000002
+   },
+   {
+    "is_error": false,
+    "input": 10,
+    "create": 0,
+    "read": 28158,
+    "output": 68,
+    "prompt": 28168,
+    "ttl_1h": 0,
+    "cost_usd": 0.0031658000000000003
+   }
+  ]
+ }
+}

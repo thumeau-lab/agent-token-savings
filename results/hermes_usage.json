@@ -1,0 +1,200 @@
+{
+ "split": "2026-10-03",
+ "price_usd_per_mtok": {
+  "input": 4.0,
+  "output": 20.0,
+  "cache_write": 8.0,
+  "cache_read": 0.2
+ },
+ "days": [
+  {
+   "day": "2026-09-21",
+   "sessions": 4,
+   "calls": 21,
+   "output": 12648,
+   "input": 42,
+   "cache_read": 603564,
+   "cache_write": 340896
+  },
+  {
+   "day": "2026-09-22",
+   "sessions": 3,
+   "calls": 13,
+   "output": 7791,
+   "input": 26,
+   "cache_read": 356373,
+   "cache_write": 172041
+  },
+  {
+   "day": "2026-09-23",
+   "sessions": 3,
+   "calls": 21,
+   "output": 10286,
+   "input": 42,
+   "cache_read": 1040866,
+   "cache_write": 166323
+  },
+  {
+   "day": "2026-09-24",
+   "sessions": 3,
+   "calls": 11,
+   "output": 5563,
+   "input": 22,
+   "cache_read": 281233,
+   "cache_write": 158326
+  },
+  {
+   "day": "2026-09-25",
+   "sessions": 9,
+   "calls": 339,
+   "output": 178925,
+   "input": 678,
+   "cache_read": 33597449,
+   "cache_write": 1773944
+  },
+  {
+   "day": "2026-09-26",
+   "sessions": 3,
+   "calls": 44,
+   "output": 24462,
+   "input": 88,
+   "cache_read": 2279283,
+   "cache_write": 257058
+  },
+  {
+   "day": "2026-09-27",
+   "sessions": 4,
+   "calls": 53,
+   "output": 22224,
+   "input": 106,
+   "cache_read": 2036921,
+   "cache_write": 237200
+  },
+  {
+   "day": "2026-09-28",
+   "sessions": 4,
+   "calls": 62,
+   "output": 24870,
+   "input": 124,
+   "cache_read": 2791486,
+   "cache_write": 500796
+  },
+  {
+   "day": "2026-09-29",
+   "sessions": 3,
+   "calls": 21,
+   "output": 10961,
+   "input": 42,
+   "cache_read": 716148,
+   "cache_write": 195371
+  },
+  {
+   "day": "2026-09-30",
+   "sessions": 12,
+   "calls": 1606,
+   "output": 1030822,
+   "input": 3388,
+   "cache_read": 573929305,
+   "cache_write": 50473023
+  },
+  {
+   "day": "2026-10-01",
+   "sessions": 20,
+   "calls": 351,
+   "output": 174222,
+   "input": 756,
+   "cache_read": 86398240,
+   "cache_write": 3569174
+  },
+  {
+   "day": "2026-10-02",
+   "sessions": 21,
+   "calls": 787,
+   "output": 413912,
+   "input": 1760,
+   "cache_read": 99993308,
+   "cache_write": 12127585
+  },
+  {
+   "day": "2026-10-03",
+   "sessions": 7,
+   "calls": 217,
+   "output": 108902,
+   "input": 454,
+   "cache_read": 17833627,
+   "cache_write": 2120015
+  },
+  {
+   "day": "2026-10-04",
+   "sessions": 17,
+   "calls": 1659,
+   "output": 899411,
+   "input": 3464,
+   "cache_read": 192332768,
+   "cache_write": 19372526
+  },
+  {
+   "day": "2026-10-05",
+   "sessions": 21,
+   "calls": 1179,
+   "output": 953743,
+   "input": 2446,
+   "cache_read": 120132771,
+   "cache_write": 8315669
+  },
+  {
+   "day": "2026-10-06",
+   "sessions": 13,
+   "calls": 1220,
+   "output": 698802,
+   "input": 2546,
+   "cache_read": 130111735,
+   "cache_write": 8691312
+  },
+  {
+   "day": "2026-10-07",
+   "sessions": 32,
+   "calls": 608,
+   "output": 611599,
+   "input": 1230,
+   "cache_read": 47367378,
+   "cache_write": 10681025
+  },
+  {
+   "day": "2026-10-08",
+   "sessions": 8,
+   "calls": 450,
+   "output": 257662,
+   "input": 924,
+   "cache_read": 49487630,
+   "cache_write": 3390244
+  },
+  {
+   "day": "2026-10-09",
+   "sessions": 20,
+   "calls": 786,
+   "output": 548312,
+   "input": 1702,
+   "cache_read": 80062376,
+   "cache_write": 5364170
+  },
+  {
+   "day": "2026-10-10",
+   "sessions": 13,
+   "calls": 461,
+   "output": 275278,
+   "input": 998,
+   "cache_read": 44293661,
+   "cache_write": 3237733
+  },
+  {
+   "day": "2026-10-11",
+   "sessions": 33,
+   "calls": 710,
+   "output": 536241,
+   "input": 1524,
+   "cache_read": 58695926,
+   "cache_write": 5945852
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+default                    prompt= 28,362  call1 create= 10,604 read= 17,748 | call2 create=  6,566 read= 21,786
+no_prompt_caching          prompt= 28,362  call1 create=      0 read=      0 | call2 create=      0 read=      0
+no_builtin_tools           prompt=  9,072  call1 create=  9,062 read=      0 | call2 create=      0 read=  9,062
+no_skills                  prompt= 25,741  call1 create=  8,450 read= 17,281 | call2 create=      0 read= 25,731
+strict_mcp_none            prompt= 28,362  call1 create=      0 read= 28,352 | call2 create=      0 read= 28,352
+no_user_settings           prompt= 24,311  call1 create=  2,515 read= 21,786 | call2 create=      0 read= 24,301
+exclude_dynamic_sections   prompt= 28,168  call1 create=  7,478 read= 20,680 | call2 create=      0 read= 28,158
+
+prefix delta vs default (call 1):
+  default                          +0 tok (+0.0%)
+  no_prompt_caching                +0 tok (+0.0%)
+  no_builtin_tools            -19,290 tok (-68.0%)
+  no_skills                    -2,621 tok (-9.2%)
+  strict_mcp_none                  +0 tok (+0.0%)
+  no_user_settings             -4,051 tok (-14.3%)
+  exclude_dynamic_sections       -194 tok (-0.7%)

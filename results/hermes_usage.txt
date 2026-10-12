@@ -1,0 +1,39 @@
+day        sess  calls    output    cache_read read/call write/call
+2026-09-21    4     21    12,648       603,564     28,741      16,233
+2026-09-22    3     13     7,791       356,373     27,413      13,233
+2026-09-23    3     21    10,286     1,040,866     49,565       7,920
+2026-09-24    3     11     5,563       281,233     25,566      14,393
+2026-09-25    9    339   178,925    33,597,449     99,107       5,232
+2026-09-26    3     44    24,462     2,279,283     51,801       5,842
+2026-09-27    4     53    22,224     2,036,921     38,432       4,475
+2026-09-28    4     62    24,870     2,791,486     45,023       8,077
+2026-09-29    3     21    10,961       716,148     34,102       9,303
+2026-09-30   12   1606 1,030,822   573,929,305    357,365      31,427
+2026-10-01   20    351   174,222    86,398,240    246,148      10,168
+2026-10-02   21    787   413,912    99,993,308    127,056      15,409
+2026-10-03    7    217   108,902    17,833,627     82,182       9,769
+2026-10-04   17   1659   899,411   192,332,768    115,932      11,677
+2026-10-05   21   1179   953,743   120,132,771    101,893       7,053
+2026-10-06   13   1220   698,802   130,111,735    106,648       7,124
+2026-10-07   32    608   611,599    47,367,378     77,906      17,567
+2026-10-08    8    450   257,662    49,487,630    109,972       7,533
+2026-10-09   20    786   548,312    80,062,376    101,860       6,824
+2026-10-10   13    461   275,278    44,293,661     96,081       7,023
+2026-10-11   33    710   536,241    58,695,926     82,670       8,374
+
+total: sessions=253 calls=10,619 read/call=145,431 write/call=12,909 hit=91.8% read/output=227x | weighted $: write 71% read 20% output 9%
+weighted total $ (Opus 5.5 API prices): output=136$ input=0$ cache_read=309$ cache_write=1,097$
+before 2026-10-03: sessions=89 calls=3,329 read/call=241,521 write/call=21,018 hit=92.0% read/output=419x | weighted $: write 74% read 21% output 5%
+after 2026-10-03:  sessions=164 calls=7,290 read/call=101,552 write/call=9,206 hit=91.7% read/output=151x | weighted $: write 69% read 19% output 12%
+read_per_call: -58%
+write_per_call: -56%
+
+sessions writing the most to cache:
+  session-14                   desktop  calls= 1220 cache_write= 47,490,959 write/call= 38,927 read/call= 398,219
+  session-15                   desktop  calls= 1230 cache_write= 15,761,616 write/call= 12,814 read/call= 122,821
+  session-16                   desktop  calls=  428 cache_write=  8,452,841 write/call= 19,749 read/call= 144,114
+  session-17                   desktop  calls=  858 cache_write=  6,582,404 write/call=  7,671 read/call= 113,942
+  session-18                   desktop  calls=  819 cache_write=  6,419,015 write/call=  7,837 read/call= 116,490
+  session-19                   desktop  calls=  459 cache_write=  2,548,232 write/call=  5,551 read/call= 118,199
+  session-20                   tui      calls=  257 cache_write=  2,450,605 write/call=  9,535 read/call= 319,737
+  session-21                   desktop  calls=  285 cache_write=  2,334,414 write/call=  8,190 read/call= 288,405

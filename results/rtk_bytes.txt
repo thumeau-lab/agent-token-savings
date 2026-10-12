@@ -1,0 +1,7 @@
+command                                 raw      rtk   gain
+git status                            2,402    1,370    43%
+git log -n 30                        23,642    9,252    61%
+git diff HEAD~3 --stat                2,539    2,538     0%
+ls -la                                9,265    3,659    61%
+find . -name '*.py' -maxdepth 3     320,299    1,133   100%
+TOTAL                               358,147   17,952    95%

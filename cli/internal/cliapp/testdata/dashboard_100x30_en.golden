@@ -1,0 +1,30 @@
+1 [Dashboard]  2 Costs  3 What gets sent  4 Cache lifetime  5 Fix
+ats dev    agent: < claude-code >  (1/4)    window: 7d    updated 0s ago
+$126.70 cost   $359.86 saved via cache   88.8% c… ╭─ Efficiency ──────────────────────────────────╮
+1.35 K calls · 65 sessions                        │ ▀▀█ █▀█      Cache hit rate               ##… │
+Yesterday $12.00   7-day avg $12.27   vs yesterd… │   █ █▀█  C+  No abnormal rebuild          ##… │
+96.2 M tok read from cache / 12.2 M tok cached /… │   █ █▄█      TTL well tuned               --… │
+                                                  ╰───────────────────────────────────────────────╯
+╭─ Cache rate by agent ─────────────────────────╮ ╭─ Daily spend ─────────────────────────────────╮
+│ agent        cache      cost      saved       │ │ Avg/day $3.51   Peak $12.54 10/12             │
+│ claude-code     87%  $101.30    $245.86       │ │ ....................████.▅▅▅▅.....     $12.54 │
+│ hermes          94%   $25.40    $114.00       │ │                     ████ ████                 │
+│ copilot         60%        -          -       │ │                     ████ ████                 │
+│ codex           50%        -          -       │ │                     ████ ████                 │
+│ unknown price for some agents                 │ │                     ████ ████           $6.27 │
+╰───────────────────────────────────────────────╯ │                     ████ ████                 │
+                                                  │                     ████ ████                 │
+                                                  │                     ████ ████           $0.00 │
+                                                  │ 10/08          10/11          10/14           │
+                                                  ╰───────────────────────────────────────────────╯
+╭─ To improve ──────────────────────────────────╮ ╭─ By model ────────────────────────────────────╮
+│ Hermes cache TTL misconfigured      $7.62 [5] │ │ claude-opus-4-5-20251101           70%     40 │
+│ Model switch empties Copilot ca…          [2] │ │ claude-sonnet-4-5-20250929         30%     20 │
+│ Abnormal rebuilds (claude-code)     $0.64 [2] │ ╰───────────────────────────────────────────────╯
+╰───────────────────────────────────────────────╯
+╭─ Measured ────────────────────────────────────╮
+│ claude-code: ~/.claude/projects/*/*.jsonl (l… │
+│ hermes: ~/.hermes/state.db (last 7 days, 40 … │
+│ copilot: ~/.copilot/session-store.db (last 7… │
+│   unknown price for this model                │
+q quit • ←/→ period • p agent • tab/1-5 switch view • ? full help • L language

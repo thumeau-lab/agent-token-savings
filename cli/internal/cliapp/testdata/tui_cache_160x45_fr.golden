@@ -1,0 +1,45 @@
+1 Tableau de bord  2 [Coûts]  3 Contenu envoyé  4 Durée du cache  5 Corriger
+ats dev    agent : < claude-code >  (1/1)    fenêtre : 7 j
+claude-code : 12 sessions, 340 appels sur 7 jours                                            claude-code : préfixe estimé à 12400 octets (~3100 tokens, bytes /
+  écriture      9870000  lecture     64700000  entrée      1200000  sortie       230000        CLAUDE.md (user)           #############-------     8000 o
+  taux de cache ##########################---- 86,7 %                                          Serveurs MCP (config.yaml) #######-------------     4400 o
+                                                                                                                          natif (non mesurable hors ligne) : ~90
+                                                                                               2 MCP servers configured: context7, kanban
+claude-code : 7 derniers jours
+  remarque : Claude Code n'a pas de session machine/cron/sous-agent : tout y est interactif.
+  12 sessions, 340 appels (0 écart moyen 5-60 min, 0 écart long >1 h)
+  Passer à 1 h de TTL économiserait environ 12,0 % du coût d'écriture.
+  recommandation :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+q quitter • ←/→ période • p agent • tab/1-5 changer de vue • ? aide complète • L langue

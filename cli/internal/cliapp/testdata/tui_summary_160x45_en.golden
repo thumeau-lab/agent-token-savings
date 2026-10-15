@@ -1,0 +1,45 @@
+5 [Summary]  1 Costs  2 What gets sent  3 Cache lifetime  4 Fix
+ats dev    agent: < claude-code >  (1/1)    window: 7d
+claude-code
+Good: Cache writes are 78% of the API-equivalent cost across 12 sessions, no abnormal rebuilds found.
+
+What this cost you
+$101.30 for this period. Without the cache, it would have cost $347.16.
+
+Compared to the previous period
+No previous period to compare yet.
+
+What to do?
+Nothing to do, everything is already well set.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+q quit • ? full help • tab/1-5 switch view • ←/→ switch agent • L language

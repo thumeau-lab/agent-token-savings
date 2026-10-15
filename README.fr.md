@@ -1,33 +1,87 @@
 <p align="center">
-  <picture><source media="(prefers-color-scheme: dark)" srcset="docs/img/hero-dark.svg"><img src="docs/img/hero.svg" alt="agent-token-savings : 71 % de la note en écriture de cache, 68 % du préfixe en schémas d'outils, -61 % de sortie git log via rtk" width="100%"></picture>
+  <img src="docs/img/ats-dashboard.png" alt="Tableau de bord ats : coût, argent économisé par le cache, taux de cache, score d'efficacité, carte d'activité, dépenses par jour, points à améliorer" width="100%">
 </p>
 
 <p align="center">
-  <b>Dépenser moins avec n'importe quel agent de code IA. Même travail, moins de tokens.</b><br>
-  Des méthodes valables chez tous les fournisseurs, des chiffres mesurés sur de vraies machines, des scripts pour mesurer ton installation.
+  <b>Voir où le cache de ton agent de code IA fait économiser, où il fuit, et quoi changer.</b><br>
+  <code>ats</code> est un binaire hors ligne qui lit les journaux locaux de tes agents. Avec les méthodes et les mesures derrière.
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-555555?style=flat-square" alt="Licence MIT"></a>
-  <img src="https://img.shields.io/badge/python-stdlib_only-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python stdlib seule">
-  <img src="https://img.shields.io/badge/works_with-Claude_Code_%7C_Codex_%7C_Gemini_CLI_%7C_Cursor_%7C_Aider_%7C_OpenCode_%7C_any_API-1b1b19?style=flat-square" alt="Compatible Claude Code, Codex, Gemini CLI, Cursor, Aider, OpenCode, toute API">
+  <img src="https://img.shields.io/badge/ats-Go_single_binary-00add8?style=flat-square&logo=go&logoColor=white" alt="Binaire Go unique">
+  <img src="https://img.shields.io/badge/offline-no_telemetry-1b1b19?style=flat-square" alt="Hors ligne, sans télémétrie">
+  <img src="https://img.shields.io/badge/reads-Claude_Code_%7C_Codex_%7C_Copilot_CLI_%7C_Hermes-1b1b19?style=flat-square" alt="Lit Claude Code, Codex, Copilot CLI, Hermes">
 </p>
 
 <p align="center"><a href="README.md">English</a> | Français</p>
 
 > Les pages de détail ([`docs/`](docs/)) et [`SETUP.md`](SETUP.md) sont en anglais.
 
-## Installation en 30 secondes
+## `ats` en une minute
 
-Colle ce message à ton agent de code. Il mesure ta consommation, propose chaque changement
-avant de l'écrire, puis te donne l'avant / après.
-
-```text
-Lis https://raw.githubusercontent.com/thumeau-lab/agent-token-savings/main/SETUP.md et applique-le à mon installation.
+```sh
+go install github.com/thumeau-lab/agent-token-savings/cli/cmd/ats@latest
+ats
 ```
 
-[`SETUP.md`](SETUP.md) est écrit pour un LLM : il détecte l'agent et le fournisseur, mesure,
-applique les leviers dans l'ordre d'impact et liste ce qu'il ne faut jamais faire.
+Les binaires précompilés (macOS, Linux, Windows, amd64 et arm64) sont sur la
+[page des releases](https://github.com/thumeau-lab/agent-token-savings/releases) ; `install.sh`
+récupère le bon, vérifie son SHA256 et le pose dans `~/.local/bin` :
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/thumeau-lab/agent-token-savings/main/install.sh | sh
+```
+
+`ats` sans argument ouvre un tableau de bord plein écran. Il détecte les agents installés et lit
+leurs journaux de session locaux. Rien ne sort de ta machine : pas de compte, pas de clé API,
+pas de réseau à l'exécution.
+
+| Agent | Ce que lit `ats` |
+|---|---|
+| Claude Code | `~/.claude/projects/*/*.jsonl` |
+| Codex CLI | `$CODEX_HOME/sessions` (par défaut `~/.codex`) |
+| GitHub Copilot CLI | `~/.copilot/session-store.db`, en lecture seule |
+| Hermes Agent | `~/.hermes/state.db` et ses profils |
+
+### Ce qu'on voit
+
+Cinq onglets, `1` à `5` ou `tab` pour passer de l'un à l'autre :
+
+1. **Tableau de bord.** Ce que tu as dépensé, ce que le cache t'a fait économiser, ton taux de
+   cache, en gros chiffres. Dessous : hier, la moyenne sur 7 jours et l'écart avec hier. Autour :
+   un score d'efficacité sur 100 avec une lettre, une carte d'activité, les dépenses par jour, le
+   taux de cache par agent et par modèle, une liste **À améliorer** classée par coût, et un cadre
+   **Mesuré** qui dit de quels fichiers vient chaque chiffre et ce qu'`ats` n'a pas pu mesurer.
+2. **Coûts.** Lectures et écritures de cache, entrée et sortie par agent, et les reconstructions
+   anormales : les appels où tout le prompt a été réécrit.
+3. **Contenu envoyé.** Ce qui remplit le début du prompt (prompt système, schémas d'outils,
+   skills) et se repaie à chaque appel.
+4. **Durée du cache.** Si la durée de vie du cache colle à ta façon de travailler : longue pour
+   un humain qui répond lentement, courte pour les sous-agents et les crons.
+5. **Corriger.** Les réglages à changer, sous forme de diff. Rien n'est écrit sans ta
+   confirmation, et une copie `.bak` horodatée est gardée. `ats` ne propose jamais de couper le
+   cache.
+
+Les flèches gauche et droite changent la période, `p` l'agent, `L` la langue (français, anglais), `?` explique chaque
+chiffre, y compris la formule du score d'efficacité.
+
+### Dans un script
+
+```text
+ats cache  [agent] [--days N] [--json]   taux de cache, lectures, écritures, reconstructions
+ats prefix [agent] [--json]              de quoi est fait le début du prompt
+ats ttl    [agent] [--days N] [--json]   la durée du cache colle-t-elle à tes sessions
+ats fix    [--write]                     montre la correction, l'applique avec --write
+```
+
+Redirigé ou avec `--no-tui`, `ats` sort du texte simple ; `--json` est stable et toujours en
+anglais. `NO_COLOR` est respecté, `--lang fr` ou `ATS_LANG=fr` change la langue.
+
+Les montants sont au tarif API public. Sur abonnement, ils mesurent la part de quota consommée,
+pas de l'argent payé. Quand `ats` ne connaît pas le prix d'un modèle (Codex, Copilot), il le dit
+au lieu de deviner. Pour la dépense globale tous fournisseurs confondus, voir
+[CodeBurn](https://github.com/getagentseal/codeburn) ; `ats` ne regarde que le cache.
 
 ## Pourquoi ton agent brûle des tokens
 
@@ -42,6 +96,13 @@ Trois idées couvrent l'essentiel du gain, quels que soient l'outil et le modèl
 2. **Raccourcir les sessions** : une session par sujet, compaction plus tôt.
 3. **Charger moins au départ** : chaque outil, skill ou serveur MCP chargé se repaie à chaque message.
 
+Tu veux que ton agent les applique pour toi ? Colle-lui ce message. Il mesure, propose chaque
+changement avant de l'écrire, puis te donne l'avant / après :
+
+```text
+Lis https://raw.githubusercontent.com/thumeau-lab/agent-token-savings/main/SETUP.md et applique-le à mon installation.
+```
+
 ## Comment marche le cache
 
 Tous les grands fournisseurs (Anthropic, OpenAI, Google, DeepSeek...) mettent en cache le
@@ -55,8 +116,9 @@ prix (vert) ; seule la fin est écrite (orange). Un octet qui change en tête, e
 Les règles varient selon le fournisseur (activation, durée de vie, surcoût d'écriture, taille
 minimale) : voir [`docs/providers.md`](docs/providers.md).
 
-
 ## Les méthodes
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/img/hero-dark.svg"><img src="docs/img/hero.svg" alt="71 % de la note en écriture de cache, 68 % du préfixe en schémas d'outils, -61 % de sortie git log via rtk" width="100%"></picture></p>
 
 | Méthode | Comment | Gain mesuré |
 |---|---|---|
@@ -83,7 +145,7 @@ minimale) : voir [`docs/providers.md`](docs/providers.md).
 Détail, sources et niveau de preuve de chaque levier : [`docs/levers.md`](docs/levers.md). Tous
 nos chiffres : [`docs/measurements.md`](docs/measurements.md).
 
-## Mesurer soi-même
+## Sans `ats`
 
 Python 3, bibliothèque standard seule. Les scripts ne font que lire ; les chemins par défaut
 sont ceux d'une installation standard.
@@ -94,20 +156,26 @@ python3 tools/claude_cache_ratio.py
 python3 tools/hermes_usage.py --days 14
 ```
 
-[`ccusage`](https://github.com/ccusage/ccusage) lit les journaux locaux des principales CLI de
-code. Avec ton propre code, lis les champs d'usage listés dans
-[`providers.md`](docs/providers.md). Regarde les tokens **relus et écrits par appel**, pas le
-taux de hit du cache : il reste autour de 90 % même quand la note est salée. Pour trouver le
-bloc qui casse le cache, `tools/cache_diff.py` capture deux requêtes via un proxy local et
-nomme le premier bloc qui diffère (clients compatibles Anthropic). Plus dans
+Regarde les tokens **relus et écrits par appel**, pas seulement le taux de cache : il reste
+autour de 90 % même quand la note est salée. Pour trouver le bloc qui casse le cache,
+`tools/cache_diff.py` capture deux requêtes via un proxy local et nomme le premier bloc qui
+diffère (clients compatibles Anthropic). Plus dans
 [`docs/measurements.md`](docs/measurements.md#reproduce).
+
+## Compiler depuis les sources
+
+```sh
+git clone https://github.com/thumeau-lab/agent-token-savings
+cd agent-token-savings/cli
+go test ./...
+go build -o ats ./cmd/ats
+```
 
 ## Limites
 
 Un seul utilisateur, nos machines, surtout des modèles Anthropic. Avant / après en corrélation,
-pas en expérience contrôlée. Dollars au tarif API public ; sur abonnement, ils mesurent la part
-de quota consommée. Les méthodes sont générales, tes chiffres seront différents : c'est pour ça
-que les scripts sont là.
+pas en expérience contrôlée. Les méthodes sont générales, tes chiffres seront différents : c'est
+pour ça qu'`ats` et les scripts sont là. La capture en haut utilise des données factices.
 
 ## Licence
 

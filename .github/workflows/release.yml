@@ -9,33 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  demo:
-    name: regenerate the VHS demo gif
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.27"
-          cache-dependency-path: cli/go.sum
-      - name: build ats for the demo
-        working-directory: cli
-        run: go build -o /usr/local/bin/ats ./cmd/ats
-      - name: install vhs
-        uses: charmbracelet/vhs-action@v2
-        with:
-          path: cli/demo.tape
-      - name: commit the regenerated gif
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/img/ats-demo.gif
-          git diff --cached --quiet || git commit -m "docs: regenerate ats demo gif for ${{ github.ref_name }}"
-          git push origin HEAD:main || true
-
   goreleaser:
     name: goreleaser
-    needs: demo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,5 +27,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-          SCOOP_BUCKET_GITHUB_TOKEN: ${{ secrets.SCOOP_BUCKET_GITHUB_TOKEN }}

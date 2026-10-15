@@ -39,33 +39,6 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
-# Published to thumeau-lab/homebrew-tap. skip_upload: auto skips the push on
-# prerelease tags (e.g. v1.0.0-rc1); without HOMEBREW_TAP_GITHUB_TOKEN set,
-# the push step itself has nothing to authenticate with and goreleaser skips
-# publishing (see docs/providers.md-style policy: never fail a release for a
-# missing optional credential).
-homebrew_casks:
-  - name: ats
-    repository:
-      owner: thumeau-lab
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    skip_upload: auto
-    homepage: "https://github.com/thumeau-lab/agent-token-savings"
-    description: "Where the prompt cache of an AI coding agent wins or loses money, and which setting to change."
-
-# Published to thumeau-lab/scoop-bucket. Same skip_upload policy as the
-# Homebrew cask above.
-scoops:
-  - name: ats
-    repository:
-      owner: thumeau-lab
-      name: scoop-bucket
-      token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
-    skip_upload: auto
-    homepage: "https://github.com/thumeau-lab/agent-token-savings"
-    description: "Where the prompt cache of an AI coding agent wins or loses money, and which setting to change."
-
 release:
   github:
     owner: thumeau-lab

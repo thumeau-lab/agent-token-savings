@@ -258,6 +258,10 @@ var catalog = map[string]map[Lang]string{
 		EN: "Copilot auto-routes models; a model switch empties the prompt cache (see the breakdown below).",
 		FR: "Copilot route automatiquement les modèles ; changer de modèle vide le cache de prompt (voir le détail ci-dessous).",
 	},
+	"note.copilot_usd": {
+		EN: "GitHub Copilot is billed by subscription, not per token; this is the API-equivalent cost at list price (OpenAI's price for the model used), not a real charge, for comparison only.",
+		FR: "GitHub Copilot est facturé par abonnement, pas au token ; ceci est le coût équivalent API au tarif catalogue (le tarif OpenAI du modèle utilisé), pas une charge réelle, à titre de comparaison seulement.",
+	},
 
 	// `ats fix` (CLI and TUI, shared where the wording matches).
 	"fix.no_config":        {EN: "hermes: no config.yaml found, nothing to fix", FR: "hermes : aucun config.yaml trouvé, rien à corriger"},

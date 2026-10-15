@@ -195,10 +195,15 @@ func codexModelBreakdown(models []codexcli.ModelUsage) []ModelUsageJSON {
 }
 
 // codexCacheResult builds the AgentCacheResult for codex from
-// codexcli.Aggregate's Report: no pricing table entry exists for OpenAI
-// model names yet, so CostUnknown is always set (the card: show tokens
-// and hit rate only, never invent a $ figure).
+// codexcli.Aggregate's Report: usd/usd_share are computed via
+// openAICostForModels when the window's whole usage is attributable to
+// one or more models in openAIPriceUSDPerMTok, otherwise CostUnknown is
+// set (the card: show tokens and hit rate only, never invent a $
+// figure for an unpriced or unknown model).
 func codexCacheResult(k agents.Kind, days int, rep codexcli.Report) AgentCacheResult {
+	breakdown := codexModelBreakdown(rep.ModelBreakdown)
+	usd, share, costUnknown := openAICostForModels(
+		rep.Totals.Uncached(), rep.Totals.Output, rep.Totals.CachedInput, rep.Totals.CacheWrite, breakdown)
 	return AgentCacheResult{
 		Agent: string(k), Days: days,
 		Sessions: int64(rep.Sessions), Calls: int64(rep.Calls),
@@ -207,8 +212,8 @@ func codexCacheResult(k agents.Kind, days int, rep codexcli.Report) AgentCacheRe
 		InputTokens:     rep.Totals.Uncached(), OutputTokens: rep.Totals.Output,
 		HitRate:              rep.Totals.HitRate(),
 		SessionsWithoutUsage: int64(rep.SessionsWithoutUsage),
-		CostUnknown:          true,
-		ModelBreakdown:       codexModelBreakdown(rep.ModelBreakdown),
+		USD:                  usd, USDShare: share, CostUnknown: costUnknown,
+		ModelBreakdown: breakdown,
 	}
 }
 
@@ -216,9 +221,13 @@ func codexCacheResult(k agents.Kind, days int, rep codexcli.Report) AgentCacheRe
 // copilotcli.QueryByModel's per-model rows: totals are the sum across
 // models (for the top-level stat grid), and ModelBreakdown carries the
 // per-model detail (a model switch empties the prompt cache, so one
-// blended total alone would hide that -- see the card). No pricing table
-// entry exists for these model names yet, so CostUnknown is always set.
-func copilotCacheResult(k agents.Kind, days int, models []copilotcli.ModelUsage) AgentCacheResult {
+// blended total alone would hide that -- see the card). usd/usd_share
+// are computed via openAICostForModels when every model in the window
+// is an OpenAI model in openAIPriceUSDPerMTok (e.g. gpt-5); otherwise
+// CostUnknown is set. Copilot is billed by subscription, not per token,
+// so a priced result also carries note.copilot_usd -- the same
+// API-equivalent-cost caveat Claude Code's note.claude_usd carries.
+func copilotCacheResult(k agents.Kind, days int, models []copilotcli.ModelUsage, lang i18n.Lang) AgentCacheResult {
 	var sessions, calls, uncached, output, read, write int64
 	breakdown := make([]ModelUsageJSON, 0, len(models))
 	for _, m := range models {
@@ -239,12 +248,18 @@ func copilotCacheResult(k agents.Kind, days int, models []copilotcli.ModelUsage)
 	if denom := uncached + read + write; denom > 0 {
 		hitRate = float64(read) / float64(denom)
 	}
+	usd, share, costUnknown := openAICostForModels(uncached, output, read, write, breakdown)
+	usdNote := ""
+	if !costUnknown {
+		usdNote = i18n.T(lang, "note.copilot_usd")
+	}
 	return AgentCacheResult{
 		Agent: string(k), Days: days,
 		Sessions: sessions, Calls: calls,
 		CacheWriteTokens: write, CacheReadTokens: read,
 		InputTokens: uncached, OutputTokens: output,
-		HitRate: hitRate, CostUnknown: true,
+		HitRate: hitRate, CostUnknown: costUnknown,
+		USD: usd, USDShare: share, USDNote: usdNote,
 		ModelBreakdown: breakdown,
 	}
 }
@@ -343,7 +358,7 @@ func collectCache(roots agents.Roots, agentFilter string, days int, lang i18n.La
 				out = append(out, skippedResult(k, i18n.T(lang, "skip.no_local_data")))
 				continue
 			}
-			out = append(out, copilotCacheResult(k, days, models))
+			out = append(out, copilotCacheResult(k, days, models, lang))
 		case agents.GeminiCLI:
 			if !roots.GeminiHasData() {
 				out = append(out, skippedResult(k, i18n.T(lang, "skip.no_local_data")))

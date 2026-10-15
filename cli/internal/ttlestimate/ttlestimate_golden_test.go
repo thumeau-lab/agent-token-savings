@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -38,7 +39,13 @@ func TestFormatMatchesPythonOnFixture(t *testing.T) {
 		t.Fatalf("python3 %s %s: %v\n%s", pyScript, home, err, out)
 	}
 
-	if got, want := res.Format(), string(out); got != want {
+	// On Windows, Python's stdout is opened in text mode: print()'s "\n"
+	// gets translated to "\r\n" on the way out, while Format() (Go) always
+	// writes a literal "\n". Normalize that platform-specific translation
+	// before comparing so the two formatters are compared on content, not
+	// on an artifact of how Python buffers its own output.
+	want := strings.ReplaceAll(string(out), "\r\n", "\n")
+	if got := res.Format(); got != want {
 		t.Errorf("Format() mismatch:\n--- go ---\n%s--- python ---\n%s", got, want)
 	}
 }

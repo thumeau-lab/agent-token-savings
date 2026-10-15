@@ -511,15 +511,24 @@ func TestTUIGoldenFixTab(t *testing.T) {
 	configPath := writeHermesConfigFixture(t, home, "prompt_caching:\n  cache_ttl: 1h\n")
 	finding := realFindingFor(t, configPath)
 
+	// The file path embeds t.TempDir()'s unique per-run path, and that
+	// path's length varies a lot by OS (short /tmp/... on Linux, long
+	// /private/var/folders/.../T/... on macOS): normalize it to a fixed
+	// placeholder *before* rendering, not after. The Fix tab body is
+	// word-wrapped by lipgloss to the viewport width, so a longer real
+	// path wraps at a different column than a short one; normalizing
+	// only the final rendered string cannot undo a wrap that already
+	// happened on the real (long) path, which is what truncated the
+	// file name on macOS. Rendering the already-normalized placeholder
+	// makes the wrap identical, and therefore the golden stable, on
+	// every OS.
+	finding.File = strings.ReplaceAll(finding.File, home, "/home/demo")
+
 	m := newTUIModel(Env{HomeDir: home, IsTTY: true, NoColor: true, Lang: i18n.EN}, testRoots(home))
 	m = resize(t, m, 100, 30)
 	m = feedLoaded(t, m, loadedMsg{days: 7, fixFinding: finding, fixHasFinding: true})
 	m.skipped = nil
 	m = press(t, m, tea.Key{Text: "5", Code: '5'})
 
-	// The file path in the body embeds t.TempDir()'s unique per-run path;
-	// normalize it to a fixed placeholder so the golden file is stable
-	// across runs and machines.
-	normalized := stripTrailingSpaces(strings.ReplaceAll(m.View().Content, home, "/home/demo"))
-	checkTUIGolden(t, "tui_fix_100x30.golden", normalized)
+	checkTUIGolden(t, "tui_fix_100x30.golden", stripTrailingSpaces(m.View().Content))
 }

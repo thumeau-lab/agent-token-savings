@@ -1,0 +1,7 @@
+# Golden snapshot test files are compared byte-for-byte against output the
+# Go code always builds with a literal "\n": without this, a Windows
+# runner's default core.autocrlf=true checks these out with "\r\n",
+# breaking every golden comparison (TestDashboardGolden*,
+# TestDashboardGoldenColor*, TestTUIGolden*, TestCardGolden*). Force LF on
+# checkout regardless of the platform or user git config.
+cli/**/testdata/** text eol=lf

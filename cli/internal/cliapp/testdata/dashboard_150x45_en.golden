@@ -6,10 +6,12 @@ ats dev    agent: < all >    window: 7d    updated 0s ago
 █                        █▀█                      cache hit rate           │   █ █▄█      TTL well tuned               ------------     no          │
 ▄█▀   █ █▄▄ █▄█ ▄   █    ▄█▀ █▄█ ▄▄█ ▄▄█ ▄ █▄█                             ╰────────────────────────────────────────────────────────────────────────╯
 █▄█                      █▄█
-cost                     saved via cache
+cost (excl. copilot,     saved via cache
+codex)
 1.35 K calls · 65 sessions
 Yesterday $12.00   7-day avg $12.27   vs yesterday -4%
-96.2 M tok read from cache / 12.2 M tok cached / 1.90 M tok sent uncached…
+96.2 M tok read from cache / 12.2 M tok cached / 1.90 M tok sent uncached
+/ 390 K tok generated
 
 ╭─ Activity ───────────────────╮ ╭─ Cache rate by agent ─────────────────────────────────────────────────────────────────────────────────────────────╮
 │     Jul         Sep     Oct  │ │ agent        cache           calls     cost      saved                                                            │
@@ -18,10 +20,10 @@ Yesterday $12.00   7-day avg $12.27   vs yesterday -4%
 │ Wed . . . . . . . . . . . .  │ │ copilot      ####---    60%     60        -          -                                                            │
 │     . . . . . . . . . . . .  │ │ codex        ####---    50%     50        -          -                                                            │
 │ Fri . . . . . . . . . . . .  │ │ unknown price for some agents                                                                                     │
-│     . . . . . . . . . . . .  │ │                                                                                                                   │
-│     . . . . . . . . . . . .  │ │                                                                                                                   │
-│ 2 active days                │ │                                                                                                                   │
-╰──────────────────────────────╯ ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+│     . . . . . . . . . . . .  │ ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+│     . . . . . . . . . . . .  │
+│ 2 active days                │
+╰──────────────────────────────╯
 ╭─ Daily spend ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ Avg/day $3.51   Peak $12.54 10/12   Yesterday $0.00                                                                                                │
 │ ................................................................................███████████████████.▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆.................... $12.54 │
@@ -34,12 +36,10 @@ Yesterday $12.00   7-day avg $12.27   vs yesterday -4%
 ╭─ To improve ──────────────────────────────────╮ ╭─ By model ────────────────────────────────────╮ ╭─ Measured ────────────────────────────────────╮
 │ Hermes cache TTL misconfigured      $7.62 [5] │ │ claude-opus-4-5-20251101           70%     40 │ │ claude-code: ~/.claude/projects/*/*.jsonl     │
 │ Model switch empties Copilot ca…          [2] │ │ claude-sonnet-4-5-20250929         30%     20 │ │ (last 7 days, 12 sessions)                    │
-│ Abnormal rebuilds (claude-code)     $0.64 [2] │ ╰───────────────────────────────────────────────╯ │ hermes: ~/.hermes/state.db (last 7 days, 40   │
-╰───────────────────────────────────────────────╯                                                   │ sessions)                                     │
-                                                                                                    │ copilot: ~/.copilot/session-store.db (last 7  │
-                                                                                                    │ days, 5 sessions)                             │
+│ Abnormal rebuilds (claude-code)     $0.64 [2] │ ╰───────────────────────────────────────────────╯ │ hermes: ~/.hermes/state.db (last 7 days,      │
+╰───────────────────────────────────────────────╯                                                   │ 40 sessions)                                  │
+                                                                                                    │ copilot: ~/.copilot/session-store.db          │
+                                                                                                    │ (last 7 days, 5 sessions)                     │
                                                                                                     │   unknown price for this model                │
                                                                                                     │ codex: ~/.codex/sessions/**/rollout-*.jsonl   │
-                                                                                                    │ (last 7 days, 8 sessions), 2 without usage    │
-                                                                                                    │   cache writes not measured by codex          │
 q quit • ←/→ period • p agent • tab/1-5 switch view • ? full help • L language

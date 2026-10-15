@@ -76,8 +76,12 @@ type dashboardDayRow struct {
 	HitRate float64
 }
 
-// dashboardModelRow is one row of the "Par modele" panel.
+// dashboardModelRow is one row of the "Par modele" panel. Agent is
+// the model's owning agent (card follow-up point 1/B: group by agent
+// so the same model name reported by two agents, e.g. claude-opus-5
+// from both claude-code and hermes, never piles up unlabeled).
 type dashboardModelRow struct {
+	Agent   string
 	Model   string
 	HitRate float64
 	Calls   int64
@@ -107,6 +111,15 @@ type dashboardData struct {
 	HeroSessions                           int64
 	TokRead, TokWrite, TokInput, TokOutput int64
 	CompareLine                            string // dim, "" when there is nothing worth showing
+
+	// HeroCostExcluded lists, in first-seen order, the in-scope
+	// agents left out of HeroCost/HeroSaved because their price is
+	// unknown (CostUnknown): HeroCost only ever sums priced agents,
+	// so this lets the renderer label the figure honestly (card
+	// follow-up point C: "cout (hors codex, copilot)") instead of
+	// implying it covers every detected agent. Empty when every
+	// in-scope agent is priced.
+	HeroCostExcluded []string
 
 	// Hero mini-stats (card 1a): yesterday's cost, the 7-day average,
 	// and the swing vs the day before yesterday, from the exact same
@@ -314,6 +327,8 @@ func buildDashboard(
 			anyCostKnown = true
 			cost += totalCacheUSD(a)
 			costWithout += costWithoutCache(a)
+		} else {
+			d.HeroCostExcluded = append(d.HeroCostExcluded, a.Agent)
 		}
 	}
 	d.HeroCost = cost
@@ -357,7 +372,7 @@ func buildDashboard(
 			continue
 		}
 		for _, mu := range a.ModelBreakdown {
-			d.ModelRows = append(d.ModelRows, dashboardModelRow{Model: mu.Model, HitRate: mu.HitRate, Calls: mu.Calls})
+			d.ModelRows = append(d.ModelRows, dashboardModelRow{Agent: a.Agent, Model: mu.Model, HitRate: mu.HitRate, Calls: mu.Calls})
 		}
 	}
 	if len(d.ModelRows) == 0 {

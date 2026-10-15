@@ -2,8 +2,8 @@
 ats dev    agent: < all >    window: 7d
 - cost   - saved via cache   86.8% cache hit rate ╭─ Efficiency ──────────────────────────────────╮
 340 calls · 12 sessions                           │ █▀█ █▀█      Cache hit rate               ##… │
-64.7 M tok read from cache / 9.87 M tok cached /… │ ▀▀█  ▄▀  A-  No abnormal rebuild          ##… │
-                                                  │ ▄▄█ █▄▄      TTL well tuned               ##… │
+64.7 M tok read from cache / 9.87 M tok cached /  │ ▀▀█  ▄▀  A-  No abnormal rebuild          ##… │
+1.20 M tok sent uncached / 230 K tok generated    │ ▄▄█ █▄▄      TTL well tuned               ##… │
                                                   ╰───────────────────────────────────────────────╯
 ╭─ Cache rate by agent ─────────────────────────╮ ╭─ Daily spend ─────────────────────────────────╮
 │ agent        cache      cost      saved       │ │ Avg/day $0.00   Peak $0.00   Yesterday $0.00  │

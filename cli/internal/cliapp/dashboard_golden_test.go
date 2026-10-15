@@ -152,6 +152,23 @@ func TestDashboardGolden200x50FR(t *testing.T) {
 	checkTUIGolden(t, "dashboard_200x50_fr.golden", stripTrailingSpaces(m.View().Content))
 }
 
+// TestDashboardGolden200x60EN / FR pin the follow-up card's new
+// real-screen evidence size (200x60, 7 j): the "Taux de cache par
+// agent" / "Activite" boxes must size to their own content (never ~25
+// blank lines), with the freed rows going to the "Depenses
+// quotidiennes" histogram instead -- see
+// TestRenderDashboardWideFillsExactlyAtVariousHeights for the
+// line-count regression test this golden complements.
+func TestDashboardGolden200x60EN(t *testing.T) {
+	m := buildDashboardModel(t, 200, 60, i18n.EN, true)
+	checkTUIGolden(t, "dashboard_200x60_en.golden", stripTrailingSpaces(m.View().Content))
+}
+
+func TestDashboardGolden200x60FR(t *testing.T) {
+	m := buildDashboardModel(t, 200, 60, i18n.FR, true)
+	checkTUIGolden(t, "dashboard_200x60_fr.golden", stripTrailingSpaces(m.View().Content))
+}
+
 // TestDashboardGoldenColor100x30EN / FR / 150x45 / 200x50 pin the
 // colored (non-NO_COLOR) run at each required size/language pair --
 // the card's "color and NO_COLOR" matrix.
@@ -194,6 +211,8 @@ var dashboardGoldenSizes = map[string]int{
 	"dashboard_150x45_fr.golden":       150,
 	"dashboard_200x50_en.golden":       200,
 	"dashboard_200x50_fr.golden":       200,
+	"dashboard_200x60_en.golden":       200,
+	"dashboard_200x60_fr.golden":       200,
 	"dashboard_color_100x30_en.golden": 100,
 	"dashboard_color_100x30_fr.golden": 100,
 	"dashboard_color_150x45_en.golden": 150,

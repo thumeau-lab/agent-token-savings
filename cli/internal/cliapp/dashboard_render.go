@@ -3,6 +3,7 @@ package cliapp
 import (
 	"fmt"
 	"image/color"
+	"sort"
 	"strings"
 	"time"
 
@@ -73,11 +74,17 @@ const (
 	dashboardHistogramDefaultRows = 8
 	// dashboardHistogramMaxRows caps the bar chart's own height (card
 	// point 4: "at 7 j it draws 7 giant bars eating half the screen
-	// ... cap the histogram height (e.g. <= 12 rows)"): any height the
-	// chart does not use because of this cap is handed to the
-	// Activite/Taux par agent panels instead (renderDashboardWide),
-	// never left as wasted blank rows above the footer.
-	dashboardHistogramMaxRows     = 12
+	// ... cap the histogram height (e.g. <= 12 rows)"). Follow-up
+	// card point A reverses the earlier redirection policy: row2
+	// (Activite/Taux par agent, see dashboardRow2) is now always
+	// sized to its own content, never padded to match a taller
+	// terminal, so every row a taller terminal frees must go to the
+	// histogram instead of inflating row2 with blank lines (real
+	// 200x60 screens showed ~25 blank lines per row2 box under the
+	// old policy). The cap stays finite (never "giant bars"), just
+	// raised enough to cover this card's own demo fixture up to a
+	// 200x60 terminal.
+	dashboardHistogramMaxRows     = 36
 	dashboardHistogramBoxOverhead = 4
 )
 
@@ -115,6 +122,31 @@ func renderDashboardWide(d dashboardData, r render.Renderer, width, height int, 
 		dashboardByModelBox(d, r, third, lang), " ",
 		dashboardMeasuredBox(d, r, third, lang))
 
+	// Row2 (Activite/Taux de cache par agent) is always sized to its
+	// own content (card follow-up point A: "Boxes must size to
+	// content height; give the remaining rows to the histogram"),
+	// never padded to match the other panel or an outer terminal
+	// height -- see dashboardRow2.
+	row2 := dashboardRow2(d, r, lang, width)
+
+	// Whatever height a taller terminal leaves over after row1/row2/
+	// row4 goes to the histogram instead (within its own cap, see
+	// dashboardHistogramMaxRows), never back into row2.
+	usedRows := countLines(row1) + 1 + countLines(row2) + countLines(row4)
+	row3 := dashboardHistogramBox(d, r, width, lang, dashboardHistogramRows(height, usedRows))
+
+	return row1 + "\n\n" + row2 + "\n" + row3 + "\n" + row4
+}
+
+// dashboardRow2 renders the wide layout's row2 (Activite + Taux de
+// cache par agent, side by side): each box sized to its own natural
+// content height, exactly like row4's three panels already are --
+// never padded to match its neighbor or any outer terminal height
+// (card follow-up point A). Taking no height parameter at all is
+// deliberate: it makes this row provably independent of the terminal
+// size by construction.
+func dashboardRow2(d dashboardData, r render.Renderer, lang i18n.Lang, width int) string {
+	half := (width - 1) / 2
 	// Activite shrinks to its fixed 12-week grid's own content width
 	// (card point 5: "Activite heatmap uses ~1/4 of its panel width
 	// ... shrink the panel to content; no big empty boxes"); the
@@ -123,47 +155,9 @@ func renderDashboardWide(d dashboardData, r render.Renderer, width, height int, 
 	activityWidth := dashboardActivityBoxWidth(half)
 	byAgentWidth := width - 1 - activityWidth
 
-	activityLines := renderPanelActivity(d, r, lang)
-	byAgentLines := renderPanelByAgent(d, r, lang, byAgentWidth)
-	row2Content := len(activityLines)
-	if n := len(byAgentLines); n > row2Content {
-		row2Content = n
-	}
-
-	// The lowered histogram cap (card point 4: "cap the histogram
-	// height (e.g. <= 12 rows)") can free up height a tall terminal
-	// would otherwise waste as blank rows above the footer; hand it to
-	// row2's two panels instead (card: "give the freed rows to
-	// Activite / Taux par agent panels") -- this also equalizes both
-	// boxes to the same height, fixing the "agent panel is half empty"
-	// look whenever its own natural content is shorter than Activite's.
-	if height > 0 {
-		fixedRows := countLines(row1) + 1 + countLines(row4)
-		remaining := height - fixedRows - (row2Content + 2) - dashboardHistogramBoxOverhead
-		if remaining > dashboardHistogramMaxRows {
-			row2Content += remaining - dashboardHistogramMaxRows
-		}
-	}
-
-	activityBox := renderPanelBox(r, i18n.T(lang, "dashboard.panel_activity"), padLines(activityLines, row2Content), activityWidth, dashboardPanelColor(r, 0))
-	byAgentBox := renderPanelBox(r, i18n.T(lang, "dashboard.panel_by_agent"), padLines(byAgentLines, row2Content), byAgentWidth, dashboardPanelColor(r, 1))
-	row2 := lipgloss.JoinHorizontal(lipgloss.Top, activityBox, " ", byAgentBox)
-
-	usedRows := countLines(row1) + 1 + countLines(row2) + countLines(row4)
-	row3 := dashboardHistogramBox(d, r, width, lang, dashboardHistogramRows(height, usedRows))
-
-	return row1 + "\n\n" + row2 + "\n" + row3 + "\n" + row4
-}
-
-// padLines appends blank lines to lines until it has at least n
-// (never truncates: n smaller than len(lines) is a no-op), so two
-// panels meant to sit side by side in the same row can be grown to a
-// shared height.
-func padLines(lines []string, n int) []string {
-	for len(lines) < n {
-		lines = append(lines, "")
-	}
-	return lines
+	activityBox := renderPanelBox(r, i18n.T(lang, "dashboard.panel_activity"), renderPanelActivity(d, r, lang), activityWidth, dashboardPanelColor(r, 0))
+	byAgentBox := renderPanelBox(r, i18n.T(lang, "dashboard.panel_by_agent"), renderPanelByAgent(d, r, lang, byAgentWidth), byAgentWidth, dashboardPanelColor(r, 1))
+	return lipgloss.JoinHorizontal(lipgloss.Top, activityBox, " ", byAgentBox)
 }
 
 // renderDashboardMedium is the 100-149 col layout (card: "same order,
@@ -293,19 +287,28 @@ func renderDashboardHero(d dashboardData, r render.Renderer, width int, lang i18
 	}
 	hitStr := render.FormatPercentLang(d.HeroHitRate*100, lang, 1)
 
+	// costLabel names the agents left out of HeroCost/HeroSaved when
+	// any are unpriced (card follow-up point C: "label it 'cout (hors
+	// codex, copilot)'" -- never invent a price, but also never imply
+	// the figure covers every detected agent).
+	costLabel := i18n.T(lang, "dashboard.hero_cost")
+	if d.HeroCostKnown && len(d.HeroCostExcluded) > 0 {
+		costLabel = i18n.T(lang, "dashboard.hero_cost_excl", strings.Join(d.HeroCostExcluded, ", "))
+	}
+
 	var sb strings.Builder
 	if allowBlockDigits && width >= dashboardHeroBlockDigitsMinWidth {
 		accent, _, _ := r.ChromeColors()
 		tileWidth := (width - 2) / 3
 		tiles := []string{
-			renderHeroTile(costStr, i18n.T(lang, "dashboard.hero_cost"), r, tileWidth, accent),
+			renderHeroTile(costStr, costLabel, r, tileWidth, accent),
 			renderHeroTile(savedStr, i18n.T(lang, "dashboard.hero_saved"), r, tileWidth, r.SemanticColor(render.SemanticGood)),
 			renderHeroTile(hitStr, i18n.T(lang, "dashboard.hero_hit_rate"), r, tileWidth, r.SemanticColor(render.HitRateSemantic(d.HeroHitRate))),
 		}
 		sb.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, tiles[0], " ", tiles[1], " ", tiles[2]))
 	} else {
 		line := fmt.Sprintf("%s %s   %s %s   %s %s",
-			costStr, i18n.T(lang, "dashboard.hero_cost"),
+			costStr, costLabel,
 			savedStr, i18n.T(lang, "dashboard.hero_saved"),
 			hitStr, i18n.T(lang, "dashboard.hero_hit_rate"))
 		if r.Colored() {
@@ -321,7 +324,16 @@ func renderDashboardHero(d dashboardData, r render.Renderer, width int, lang i18
 	tokLine := i18n.T(lang, "dashboard.hero_tokens_line",
 		render.FormatCountLang(d.TokRead, lang), render.FormatCountLang(d.TokWrite, lang),
 		render.FormatCountLang(d.TokInput, lang), render.FormatCountLang(d.TokOutput, lang))
-	sb.WriteString(r.Muted(tokLine))
+	// The token-counts line wraps instead of being truncated with an
+	// ellipsis when it does not fit the hero's own column (card
+	// follow-up point 3): there is free space elsewhere on screen, an
+	// ellipsis just throws tokens information away for nothing.
+	for i, l := range wrapToWidth(tokLine, width) {
+		if i > 0 {
+			sb.WriteString("\n")
+		}
+		sb.WriteString(r.Muted(l))
+	}
 	if d.CompareLine != "" {
 		sb.WriteString("\n")
 		sb.WriteString(r.Muted(d.CompareLine))
@@ -932,6 +944,15 @@ func renderPanelByDay(d dashboardData, r render.Renderer, lang i18n.Lang) []stri
 // when the panel genuinely lacks room (card point 2: names were
 // truncated at a hardcoded 12 columns even with ~60 free columns at
 // 200x50).
+//
+// Rows are grouped by their owning agent (card follow-up point 1/B:
+// the same model name reported by two agents -- e.g. claude-opus-5
+// from both claude-code and hermes, or gpt-5.6-luna from both codex
+// and copilot -- used to pile up unreadable with no agent marker).
+// Each agent gets a dim sub-header line, its own models sorted by
+// calls descending underneath; when only one agent is in scope
+// (buildDashboard already filters ModelRows to the selected agent)
+// there is nothing to disambiguate, so the header is skipped.
 func renderPanelByModel(d dashboardData, r render.Renderer, lang i18n.Lang, width int) []string {
 	if d.ModelNote != "" {
 		return []string{r.Muted(d.ModelNote)}
@@ -945,14 +966,53 @@ func renderPanelByModel(d dashboardData, r render.Renderer, lang i18n.Lang, widt
 	if modelW < 12 {
 		modelW = 12
 	}
+	groups := groupModelRowsByAgent(d.ModelRows)
+	showHeader := len(groups) > 1
 	var lines []string
-	for _, row := range d.ModelRows {
-		lines = append(lines,
-			fixedWidth(truncateRunes(row.Model, modelW), modelW, false)+" "+
-				fixedWidth(render.FormatPercentLang(row.HitRate*100, lang, 0), hitW, true)+" "+
-				fixedWidth(render.FormatCountLang(row.Calls, lang), callsW, true))
+	for _, g := range groups {
+		if showHeader {
+			lines = append(lines, r.Muted(g.Agent))
+		}
+		for _, row := range g.Rows {
+			lines = append(lines,
+				fixedWidth(truncateRunes(row.Model, modelW), modelW, false)+" "+
+					fixedWidth(render.FormatPercentLang(row.HitRate*100, lang, 0), hitW, true)+" "+
+					fixedWidth(render.FormatCountLang(row.Calls, lang), callsW, true))
+		}
 	}
 	return lines
+}
+
+// dashboardModelGroup is one agent's models for panel "Par modele"
+// grouped rendering, see renderPanelByModel.
+type dashboardModelGroup struct {
+	Agent string
+	Rows  []dashboardModelRow
+}
+
+// groupModelRowsByAgent groups rows by their Agent field, preserving
+// each agent's first-appearance order (stable across runs, matches
+// the order cache results were collected in), and sorts each agent's
+// own rows by Calls descending (card: "sort models by calls desc
+// inside each agent"; ties keep their original relative order).
+func groupModelRowsByAgent(rows []dashboardModelRow) []dashboardModelGroup {
+	var groups []dashboardModelGroup
+	index := map[string]int{}
+	for _, row := range rows {
+		i, ok := index[row.Agent]
+		if !ok {
+			i = len(groups)
+			index[row.Agent] = i
+			groups = append(groups, dashboardModelGroup{Agent: row.Agent})
+		}
+		groups[i].Rows = append(groups[i].Rows, row)
+	}
+	for i := range groups {
+		sort.SliceStable(groups[i].Rows, func(a, b int) bool {
+			return groups[i].Rows[a].Calls > groups[i].Rows[b].Calls
+		})
+	}
+	return groups
 }
 
 // renderPanelImprove builds panel E's rows: the ranked findings
@@ -1095,12 +1155,28 @@ func efficiencyBoolSemantic(ok bool) render.Semantic {
 // can run longer than the box's own inner width (card point 6: wrap
 // inside the panel instead of truncating with an ellipsis).
 func wrapToWidth(s string, width int) []string {
-	if width < 1 {
-		width = 1
-	}
 	words := strings.Fields(s)
 	if len(words) == 0 {
 		return []string{s}
+	}
+	return wrapWords(words, width)
+}
+
+// wrapWords is wrapToWidth's shared core, taking words that are
+// already split into their final atomic units: unlike wrapToWidth
+// (which splits s on every whitespace run), a caller that needs a
+// multi-word phrase to never break across lines -- e.g. "4 sans
+// usage" in renderPanelMeasured, card follow-up point D: word-by-word
+// wrapping broke it as "...26 sessions), 4" / "sans usage" -- passes
+// that phrase as one element of words instead of letting it get
+// re-split. Only a single element wider than width on its own is
+// still hard-split, so the wrapper always makes progress.
+func wrapWords(words []string, width int) []string {
+	if width < 1 {
+		width = 1
+	}
+	if len(words) == 0 {
+		return []string{""}
 	}
 	var lines []string
 	cur := words[0]
@@ -1144,13 +1220,20 @@ func renderPanelMeasured(d dashboardData, r render.Renderer, lang i18n.Lang, wid
 	}
 	var lines []string
 	for _, row := range d.Measured {
-		line := fmt.Sprintf("%s: %s (%s, %s)",
-			row.Agent, row.Source, row.Period,
-			i18n.T(lang, "dashboard.measured_sessions", render.FormatCountLang(row.Sessions, lang)))
+		// Built as atomic tokens (never re-split by wrapWords) so a
+		// quantity phrase like "26 sessions" or "4 sans usage" always
+		// stays on one line when the row wraps (card follow-up point
+		// D: plain word-by-word wrapping broke "4 sans usage" across
+		// two lines).
+		sessionsPhrase := i18n.T(lang, "dashboard.measured_sessions", render.FormatCountLang(row.Sessions, lang))
+		tokens := []string{row.Agent + ":", row.Source}
 		if row.SessionsNoUsage > 0 {
-			line += fmt.Sprintf(", %s", i18n.T(lang, "dashboard.measured_sessions_no_usage", render.FormatCountLang(row.SessionsNoUsage, lang)))
+			noUsagePhrase := i18n.T(lang, "dashboard.measured_sessions_no_usage", render.FormatCountLang(row.SessionsNoUsage, lang))
+			tokens = append(tokens, "("+row.Period+",", sessionsPhrase+",", noUsagePhrase+")")
+		} else {
+			tokens = append(tokens, "("+row.Period+",", sessionsPhrase+")")
 		}
-		lines = append(lines, wrapToWidth(line, inner)...)
+		lines = append(lines, wrapWords(tokens, inner)...)
 		if row.Note != "" {
 			for _, l := range wrapToWidth(row.Note, inner-2) {
 				lines = append(lines, r.Muted("  "+l))

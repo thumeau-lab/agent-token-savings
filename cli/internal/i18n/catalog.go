@@ -323,9 +323,10 @@ var catalog = map[string]map[Lang]string{
 	// Dashboard tab (tui.go's dashboardBody / dashboard.go /
 	// dashboard_render.go): the card-mandated "numbers first, words
 	// second" replacement for the old prose Resume tab.
-	"dashboard.hero_cost":     {EN: "cost", FR: "coût"},
-	"dashboard.hero_saved":    {EN: "saved via cache", FR: "économisé grâce au cache"},
-	"dashboard.hero_hit_rate": {EN: "cache hit rate", FR: "taux de cache"},
+	"dashboard.hero_cost":      {EN: "cost", FR: "coût"},
+	"dashboard.hero_cost_excl": {EN: "cost (excl. %s)", FR: "coût (hors %s)"},
+	"dashboard.hero_saved":     {EN: "saved via cache", FR: "économisé grâce au cache"},
+	"dashboard.hero_hit_rate":  {EN: "cache hit rate", FR: "taux de cache"},
 	"dashboard.hero_tokens_line": {
 		EN: "%s tok read from cache / %s tok cached / %s tok sent uncached / %s tok generated",
 		FR: "%s tok lus du cache / %s tok mis en cache / %s tok envoyés sans cache / %s tok générés",

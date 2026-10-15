@@ -476,3 +476,82 @@ func TestRenderPanelHistogramChipsLineNeverTruncatesMoneyAtNarrowWidth(t *testin
 		t.Fatalf("dashboardHistogramBox(width=49) = %q, chips line truncated right after \"Hier\"", box)
 	}
 }
+
+// TestRenderDashboardHeroTokensLineWrapsInsteadOfTruncating is the
+// follow-up card's point 3 regression test: at a hero column width
+// that is generous overall but still narrower than the full token
+// line (e.g. the hero's own ~half-terminal column at 200 cols), the
+// dim token-counts line must wrap onto a second line instead of being
+// cut with an ellipsis -- there is free space elsewhere on screen, an
+// ellipsis just throws information away for nothing.
+func TestRenderDashboardHeroTokensLineWrapsInsteadOfTruncating(t *testing.T) {
+	d := dashboardData{
+		HeroCostKnown: true, HeroCost: 65.59, HeroSaved: 420.11, HeroHitRate: 0.91,
+		TokRead: 9_330_000_000, TokWrite: 512_000_000, TokInput: 2_400_000, TokOutput: 530_000,
+	}
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	const width = 99 // the wide layout's hero column at 200 cols: (200-1)/2
+	out := renderDashboardHero(d, r, width, i18n.FR, true)
+	if strings.Contains(out, "\u2026") {
+		t.Fatalf("renderDashboardHero(width=%d) = %q, the tokens line was truncated with an ellipsis, want it wrapped onto another line instead", width, out)
+	}
+	for i, line := range strings.Split(out, "\n") {
+		if w := len([]rune(line)); w > width {
+			t.Fatalf("renderDashboardHero(width=%d) line %d is %d cols wide, want <= %d:\n%q", width, i, w, width, line)
+		}
+	}
+}
+
+// TestRenderDashboardHeroShowsCostExclusionLabelWhenSomeAgentsUnpriced
+// is the follow-up card's point C regression test: the hero "cout"
+// figure only ever sums the agents with a known price (buildDashboard
+// skips CostUnknown agents), so showing the plain "cout" label next
+// to it implied the figure covered every detected agent when it did
+// not. When d.HeroCostExcluded lists the unpriced agents, the label
+// must name them instead of silently under-representing the total.
+func TestRenderDashboardHeroShowsCostExclusionLabelWhenSomeAgentsUnpriced(t *testing.T) {
+	d := dashboardData{
+		HeroCostKnown: true, HeroCost: 65.59, HeroSaved: 100, HeroHitRate: 0.9,
+		HeroCostExcluded: []string{"codex", "copilot"},
+	}
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	out := renderDashboardHero(d, r, 99, i18n.EN, false)
+	if !strings.Contains(out, "excl. codex, copilot") {
+		t.Fatalf("renderDashboardHero() = %q, want the cost label to name the excluded agents (\"excl. codex, copilot\")", out)
+	}
+}
+
+// TestRenderDashboardHeroOmitsExclusionLabelWhenEveryAgentIsPriced:
+// the plain "cost" label stays unchanged when every agent in scope
+// has a known price (no HeroCostExcluded).
+func TestRenderDashboardHeroOmitsExclusionLabelWhenEveryAgentIsPriced(t *testing.T) {
+	d := dashboardData{HeroCostKnown: true, HeroCost: 65.59, HeroSaved: 100, HeroHitRate: 0.9}
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	out := renderDashboardHero(d, r, 99, i18n.EN, false)
+	if strings.Contains(out, "excl.") {
+		t.Fatalf("renderDashboardHero() = %q, want no exclusion label when every agent is priced", out)
+	}
+}
+
+// TestRenderPanelMeasuredKeepsSessionCountPhraseTogetherWhenWrapping
+// is the follow-up card's point D regression test: at a width that
+// makes the codex row wrap, the "<not>'N sans usage'<newline>" count
+// phrase must never be split mid-phrase (word-by-word wrapping broke
+// it as "...26 sessions), 4" / "sans usage" on a real 200x50 fr
+// screen) -- it must wrap on whole-segment boundaries instead, so
+// the quantity phrase always stays on one line.
+func TestRenderPanelMeasuredKeepsSessionCountPhraseTogetherWhenWrapping(t *testing.T) {
+	d := dashboardData{Measured: []dashboardMeasuredRow{
+		{
+			Agent: "codex", Source: dashboardMeasuredSource[string(agents.Codex)],
+			Period: i18n.T(i18n.FR, "card.last_days", 7), Sessions: 26, SessionsNoUsage: 4,
+		},
+	}}
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	const width = 90
+	lines := renderPanelMeasured(d, r, i18n.FR, width)
+	joined := strings.Join(lines, "\n")
+	if !strings.Contains(joined, "4 sans usage") {
+		t.Fatalf("renderPanelMeasured(width=%d) = %q, want the phrase \"4 sans usage\" to stay together on one line (wrap on segment boundaries, not mid-phrase)", width, joined)
+	}
+}

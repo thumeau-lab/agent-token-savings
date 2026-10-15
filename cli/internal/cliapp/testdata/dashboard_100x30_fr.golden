@@ -1,10 +1,11 @@
 1 [Tableau de bord]  2 Coûts  3 Contenu envoyé  4 Durée du cache  5 Corriger
 ats dev    agent : < tous >    fenêtre : 7 j    mis à jour il y a 0s
-126,70 $ coût   359,86 $ économisé grâce au cach… ╭─ Efficacité ──────────────────────────────────╮
+126,70 $ coût (hors copilot, codex)   359,86 $ é… ╭─ Efficacité ──────────────────────────────────╮
 1,35 K appels · 65 sessions                       │ ▀▀█ █▀█      Taux de cache                ##… │
 Hier 12,00 $   Moy. 7 jours 12,27 $   vs hier -4… │   █ █▀█  C+  Sans reconstruction anormale ##… │
-96,2 M tok lus du cache / 12,2 M tok mis en cach… │   █ █▄█      TTL bien réglé               --… │
-                                                  ╰───────────────────────────────────────────────╯
+96,2 M tok lus du cache / 12,2 M tok mis en cache │   █ █▄█      TTL bien réglé               --… │
+/ 1,90 M tok envoyés sans cache / 390 K tok       ╰───────────────────────────────────────────────╯
+générés
 ╭─ Taux de cache par agent ─────────────────────╮ ╭─ Dépenses quotidiennes ───────────────────────╮
 │ agent        cache      coût  économisé       │ │ Moy./jour 3,51 $   Pic 12,54 $ 12/10          │
 │ claude-code    87 % 101,30 $   245,86 $       │ │ ....................████.▅▅▅▅.....    12,54 $ │
@@ -23,8 +24,7 @@ Hier 12,00 $   Moy. 7 jours 12,27 $   vs hier -4… │   █ █▀█  C+  San
 │ Reconstructions anormales (clau…   0,64 $ [2] │ ╰───────────────────────────────────────────────╯
 ╰───────────────────────────────────────────────╯
 ╭─ Mesuré ──────────────────────────────────────╮
-│ claude-code: ~/.claude/projects/*/*.jsonl (7  │
-│ derniers jours, 12 sessions)                  │
+│ claude-code: ~/.claude/projects/*/*.jsonl     │
+│ (7 derniers jours, 12 sessions)               │
 │ hermes: ~/.hermes/state.db (7 derniers jours, │
-│ 40 sessions)                                  │
 q quitter • ←/→ période • p agent • tab/1-5 changer de vue • ? aide complète • L langue

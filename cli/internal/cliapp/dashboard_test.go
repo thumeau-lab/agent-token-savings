@@ -2,6 +2,7 @@ package cliapp
 
 import (
 	"testing"
+	"time"
 
 	"github.com/thumeau-lab/agent-token-savings/cli/internal/fixer"
 	"github.com/thumeau-lab/agent-token-savings/cli/internal/i18n"
@@ -176,5 +177,55 @@ func TestBuildFindingsLabelsAreShortPlainWords(t *testing.T) {
 		if n := len([]rune(f.Label)); n > 40 {
 			t.Errorf("finding label %q is %d runes, want <= 40", f.Label, n)
 		}
+	}
+}
+
+// TestBuildDashboardHeroCostExcludedListsUnpricedAgentsInScope is the
+// follow-up card's point C regression test: HeroCost/HeroCostKnown
+// only ever sum the agents with a known price (the main loop skips
+// CostUnknown agents), so buildDashboard must also record which
+// agents were left out of that sum, in scope, so the renderer can
+// label the figure honestly instead of implying it covers every
+// detected agent.
+func TestBuildDashboardHeroCostExcludedListsUnpricedAgentsInScope(t *testing.T) {
+	claude := demoCacheResult()
+	claude.USD, claude.USDShare = usdSplit(claude.InputTokens, claude.OutputTokens, claude.CacheReadTokens, claude.CacheWriteTokens)
+	codex := AgentCacheResult{Agent: "codex", Calls: 1420, CostUnknown: true, CacheReadTokens: 500_000, InputTokens: 100_000, OutputTokens: 20_000}
+	copilot := AgentCacheResult{Agent: "copilot", Calls: 60, CostUnknown: true, CacheReadTokens: 100_000, InputTokens: 20_000, OutputTokens: 5_000}
+	now := time.Date(2026, 10, 14, 12, 0, 0, 0, time.UTC)
+
+	d := buildDashboard(
+		[]AgentCacheResult{claude, codex, copilot}, nil, fixer.Finding{}, false,
+		nil, nil, nil, now, 7,
+		comparisonResult{}, comparisonResult{}, nil, "", i18n.EN,
+	)
+	if !d.HeroCostKnown {
+		t.Fatal("HeroCostKnown = false, want true (claude-code is priced)")
+	}
+	want := []string{"codex", "copilot"}
+	if len(d.HeroCostExcluded) != len(want) {
+		t.Fatalf("HeroCostExcluded = %v, want %v", d.HeroCostExcluded, want)
+	}
+	for i, a := range want {
+		if d.HeroCostExcluded[i] != a {
+			t.Fatalf("HeroCostExcluded = %v, want %v", d.HeroCostExcluded, want)
+		}
+	}
+}
+
+// TestBuildDashboardHeroCostExcludedEmptyWhenEveryAgentPriced: no
+// exclusion list when every in-scope agent has a known price.
+func TestBuildDashboardHeroCostExcludedEmptyWhenEveryAgentPriced(t *testing.T) {
+	claude := demoCacheResult()
+	claude.USD, claude.USDShare = usdSplit(claude.InputTokens, claude.OutputTokens, claude.CacheReadTokens, claude.CacheWriteTokens)
+	now := time.Date(2026, 10, 14, 12, 0, 0, 0, time.UTC)
+
+	d := buildDashboard(
+		[]AgentCacheResult{claude}, nil, fixer.Finding{}, false,
+		nil, nil, nil, now, 7,
+		comparisonResult{}, comparisonResult{}, nil, "", i18n.EN,
+	)
+	if len(d.HeroCostExcluded) != 0 {
+		t.Fatalf("HeroCostExcluded = %v, want empty (every in-scope agent is priced)", d.HeroCostExcluded)
 	}
 }

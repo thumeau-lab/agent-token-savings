@@ -109,35 +109,24 @@ func TestDashboardHistogramRowsHasAnUpperCap(t *testing.T) {
 	}
 }
 
-// TestDashboardHistogramRowsCapIsTwelve is the card point 4 regression
-// test: at 7 j the bar chart used to grow tall enough to "eat half the
-// screen" (the previous card had raised the cap to 40 to fill a 200x50
-// terminal exactly). The cap must come back down to a sane ceiling so
-// a handful of days never draws giant bars; the freed rows go to the
-// Activite/Taux par agent panels instead (see
-// TestRenderDashboardWideGivesFreedHistogramRowsToRow2PanelsWithoutWastingSpace).
-func TestDashboardHistogramRowsCapIsTwelve(t *testing.T) {
-	if got := dashboardHistogramRows(2000, 20); got != 12 {
-		t.Fatalf("dashboardHistogramRows(2000, 20) = %d, want 12", got)
-	}
-}
-
-// TestRenderDashboardWideGivesFreedHistogramRowsToRow2PanelsWithoutWastingSpace
-// is the card point 4 regression test for the lowered histogram cap:
-// lowering dashboardHistogramMaxRows alone would leave blank rows
-// above the footer whenever the real "remaining" height exceeds the
-// new cap. Those freed rows must go to the Activite/Taux par agent
-// panels instead (card: "give the freed rows to Activite / Taux par
-// agent panels"), so the wide layout's total rendered height still
-// matches the real terminal height exactly, no wasted space.
-func TestRenderDashboardWideGivesFreedHistogramRowsToRow2PanelsWithoutWastingSpace(t *testing.T) {
+// TestRenderDashboardWideFillsExactlyAtVariousHeights is the
+// follow-up card's point A regression test, covering both the
+// existing 200x50 size and the new real-screen evidence at 200x60:
+// row2 (Activite/Taux par agent) is now height-independent (see
+// dashboard_row2_test.go), so every row a taller terminal frees must
+// go to the histogram instead (card: "cap it, but never leave empty
+// boxes") -- the wide layout's total rendered height must still match
+// the real terminal height exactly, no wasted space, at every tested
+// size.
+func TestRenderDashboardWideFillsExactlyAtVariousHeights(t *testing.T) {
 	d := dashboardLayoutFixture()
 	r := render.New(render.Options{IsTTY: true, NoColor: true})
-	const height = 50
-	out := renderDashboard(d, r, 200, height, i18n.EN, true)
-	lines := strings.Split(out, "\n")
-	if len(lines) != height {
-		t.Fatalf("renderDashboard(200,%d) produced %d lines, want exactly %d (freed histogram rows must go to row2 panels, not be wasted)", height, len(lines), height)
+	for _, height := range []int{45, 50, 60} {
+		out := renderDashboard(d, r, 200, height, i18n.EN, true)
+		lines := strings.Split(out, "\n")
+		if len(lines) != height {
+			t.Errorf("renderDashboard(200,%d) produced %d lines, want exactly %d (freed histogram rows must fill the chart, not be wasted)", height, len(lines), height)
+		}
 	}
 }
 

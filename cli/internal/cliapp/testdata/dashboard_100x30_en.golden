@@ -1,10 +1,10 @@
 1 [Dashboard]  2 Costs  3 What gets sent  4 Cache lifetime  5 Fix
 ats dev    agent: < all >    window: 7d    updated 0s ago
-$126.70 cost   $359.86 saved via cache   88.8% c… ╭─ Efficiency ──────────────────────────────────╮
+$126.70 cost (excl. copilot, codex)   $359.86 sa… ╭─ Efficiency ──────────────────────────────────╮
 1.35 K calls · 65 sessions                        │ ▀▀█ █▀█      Cache hit rate               ##… │
 Yesterday $12.00   7-day avg $12.27   vs yesterd… │   █ █▀█  C+  No abnormal rebuild          ##… │
-96.2 M tok read from cache / 12.2 M tok cached /… │   █ █▄█      TTL well tuned               --… │
-                                                  ╰───────────────────────────────────────────────╯
+96.2 M tok read from cache / 12.2 M tok cached /  │   █ █▄█      TTL well tuned               --… │
+1.90 M tok sent uncached / 390 K tok generated    ╰───────────────────────────────────────────────╯
 ╭─ Cache rate by agent ─────────────────────────╮ ╭─ Daily spend ─────────────────────────────────╮
 │ agent        cache      cost      saved       │ │ Avg/day $3.51   Peak $12.54 10/12             │
 │ claude-code     87%  $101.30    $245.86       │ │ ....................████.▅▅▅▅.....     $12.54 │
@@ -25,6 +25,6 @@ Yesterday $12.00   7-day avg $12.27   vs yesterd… │   █ █▀█  C+  No 
 ╭─ Measured ────────────────────────────────────╮
 │ claude-code: ~/.claude/projects/*/*.jsonl     │
 │ (last 7 days, 12 sessions)                    │
-│ hermes: ~/.hermes/state.db (last 7 days, 40   │
-│ sessions)                                     │
+│ hermes: ~/.hermes/state.db (last 7 days,      │
+│ 40 sessions)                                  │
 q quit • ←/→ period • p agent • tab/1-5 switch view • ? full help • L language

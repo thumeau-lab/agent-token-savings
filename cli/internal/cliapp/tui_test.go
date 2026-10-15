@@ -523,6 +523,14 @@ func TestTUIGoldenFixTab(t *testing.T) {
 	// makes the wrap identical, and therefore the golden stable, on
 	// every OS.
 	finding.File = strings.ReplaceAll(finding.File, home, "/home/demo")
+	// On Windows, home and the rest of the path (joined by filepath.Join)
+	// use backslash separators; the replacement above only swaps the
+	// home prefix for the forward-slash placeholder and leaves any
+	// trailing backslashes from the real path untouched. Normalize to
+	// forward slashes now, before rendering, so the golden is identical
+	// across OSes (same reasoning as the comment above: this must happen
+	// before word-wrap, not after).
+	finding.File = filepath.ToSlash(finding.File)
 
 	m := newTUIModel(Env{HomeDir: home, IsTTY: true, NoColor: true, Lang: i18n.EN}, testRoots(home))
 	m = resize(t, m, 100, 30)

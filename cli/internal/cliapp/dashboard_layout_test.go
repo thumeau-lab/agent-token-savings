@@ -109,6 +109,69 @@ func TestDashboardHistogramRowsHasAnUpperCap(t *testing.T) {
 	}
 }
 
+// TestDashboardHistogramRowsCapIsTwelve is the card point 4 regression
+// test: at 7 j the bar chart used to grow tall enough to "eat half the
+// screen" (the previous card had raised the cap to 40 to fill a 200x50
+// terminal exactly). The cap must come back down to a sane ceiling so
+// a handful of days never draws giant bars; the freed rows go to the
+// Activite/Taux par agent panels instead (see
+// TestRenderDashboardWideGivesFreedHistogramRowsToRow2PanelsWithoutWastingSpace).
+func TestDashboardHistogramRowsCapIsTwelve(t *testing.T) {
+	if got := dashboardHistogramRows(2000, 20); got != 12 {
+		t.Fatalf("dashboardHistogramRows(2000, 20) = %d, want 12", got)
+	}
+}
+
+// TestRenderDashboardWideGivesFreedHistogramRowsToRow2PanelsWithoutWastingSpace
+// is the card point 4 regression test for the lowered histogram cap:
+// lowering dashboardHistogramMaxRows alone would leave blank rows
+// above the footer whenever the real "remaining" height exceeds the
+// new cap. Those freed rows must go to the Activite/Taux par agent
+// panels instead (card: "give the freed rows to Activite / Taux par
+// agent panels"), so the wide layout's total rendered height still
+// matches the real terminal height exactly, no wasted space.
+func TestRenderDashboardWideGivesFreedHistogramRowsToRow2PanelsWithoutWastingSpace(t *testing.T) {
+	d := dashboardLayoutFixture()
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	const height = 50
+	out := renderDashboard(d, r, 200, height, i18n.EN, true)
+	lines := strings.Split(out, "\n")
+	if len(lines) != height {
+		t.Fatalf("renderDashboard(200,%d) produced %d lines, want exactly %d (freed histogram rows must go to row2 panels, not be wasted)", height, len(lines), height)
+	}
+}
+
+// TestDashboardActivityBoxWidthShrinksToContentNotHalfColumn is the
+// card point 5 regression test: the Activite heatmap only ever needs
+// heatmapGutterWidth + dashboardHeatmapWeeks*heatmapCellWidth columns
+// of content (a fixed 12-week grid), so giving it a full half-width
+// column at 200 cols wasted ~3/4 of its own panel width. The box must
+// shrink to its content width, handing the recovered columns to its
+// row2 neighbor (Taux de cache par agent) instead of sitting mostly
+// empty.
+func TestDashboardActivityBoxWidthShrinksToContentNotHalfColumn(t *testing.T) {
+	half := 99 // (200-1)/2, the wide layout's column width at 200 cols
+	got := dashboardActivityBoxWidth(half)
+	if got >= half {
+		t.Fatalf("dashboardActivityBoxWidth(half=%d) = %d, want it shrunk well below half (the heatmap was using ~1/4 of its panel width)", half, got)
+	}
+	want := heatmapGutterWidth + dashboardHeatmapWeeks*heatmapCellWidth + 4
+	if got != want {
+		t.Fatalf("dashboardActivityBoxWidth(half=%d) = %d, want %d (gutter + weeks*cellWidth + box borders/padding)", half, got, want)
+	}
+}
+
+// TestDashboardActivityBoxWidthNeverExceedsItsFairShare: on a narrower
+// terminal where even half a column is less than the heatmap's own
+// content width, the box must never grow past what row2 actually has
+// to give it.
+func TestDashboardActivityBoxWidthNeverExceedsItsFairShare(t *testing.T) {
+	half := 20
+	if got := dashboardActivityBoxWidth(half); got != half {
+		t.Fatalf("dashboardActivityBoxWidth(half=%d) = %d, want capped at half", half, got)
+	}
+}
+
 // TestRenderPanelHistogramSpreadsBarsAcrossFullWidth pins card point
 // 4's main fix: with few days and a wide panel, bars must occupy most
 // of the available width (bar width = (panelWidth-axis)/days), not a

@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/colorprofile"
 
+	"github.com/thumeau-lab/agent-token-savings/cli/internal/agents"
 	"github.com/thumeau-lab/agent-token-savings/cli/internal/i18n"
 	"github.com/thumeau-lab/agent-token-savings/cli/internal/render"
 )
@@ -20,12 +21,70 @@ func TestRenderPanelMeasuredUsesPlainSessionsWording(t *testing.T) {
 		{Agent: "hermes", Source: "~/.hermes/state.db", Period: "7 derniers jours", Sessions: 337},
 	}}
 	r := render.New(render.Options{IsTTY: true, NoColor: true})
-	joined := strings.Join(renderPanelMeasured(d, r, i18n.FR), "\n")
+	joined := strings.Join(renderPanelMeasured(d, r, i18n.FR, 70), "\n")
 	if strings.Contains(joined, "sessions=337") {
 		t.Fatalf("still using the old sessions=N format: %q", joined)
 	}
 	if !strings.Contains(joined, "337 sessions") {
 		t.Fatalf("want plain-words %q, got %q", "337 sessions", joined)
+	}
+}
+
+// TestRenderPanelMeasuredWrapsLongLinesInsteadOfTruncating is the card
+// point 6 regression test: the codex row's line ("codex:
+// ~/.codex/sessions/**/rollout-*.jsonl (last 7 days, 26 sessions), 4
+// without usage") is longer than a row4 third-width panel at 200 cols
+// -- it must wrap onto a continuation line inside the box, never cut
+// short with an ellipsis.
+func TestRenderPanelMeasuredWrapsLongLinesInsteadOfTruncating(t *testing.T) {
+	d := dashboardData{Measured: []dashboardMeasuredRow{
+		{
+			Agent: "codex", Source: dashboardMeasuredSource[string(agents.Codex)],
+			Period: "last 7 days", Sessions: 26, SessionsNoUsage: 4,
+		},
+	}}
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	const width = 70
+	lines := renderPanelMeasured(d, r, i18n.EN, width)
+	joined := strings.Join(lines, "\n")
+	if strings.Contains(joined, "\u2026") {
+		t.Fatalf("renderPanelMeasured(width=%d) = %q, the codex line was truncated with an ellipsis, want it wrapped instead", width, joined)
+	}
+	if !strings.Contains(joined, dashboardMeasuredSource[string(agents.Codex)]) {
+		t.Fatalf("renderPanelMeasured(width=%d) = %q, missing the full source path (never cut)", width, joined)
+	}
+	if !strings.Contains(joined, "4") || !strings.Contains(joined, "without usage") {
+		t.Fatalf("renderPanelMeasured(width=%d) = %q, missing the \"without usage\" detail (never cut)", width, joined)
+	}
+	inner := width - 4
+	for i, line := range lines {
+		if w := len([]rune(line)); w > inner {
+			t.Fatalf("renderPanelMeasured(width=%d) line %d is %d cols wide, want <= %d (wrapped to the box's own inner width): %q", width, i, w, inner, line)
+		}
+	}
+}
+
+// TestRenderPanelByAgentNeverWrapsWithFourDigitCostOrSavedAmounts is
+// the card point 1 regression test: a cost with 4 digits (e.g.
+// "1812,36 $" in fr, 9 columns) overflowed the old fixed 8-column cost
+// field, making lipgloss wrap the row onto a second visual line and
+// misplace the box's right border. Columns must size from the widest
+// formatted value actually present, never wrap a data row.
+func TestRenderPanelByAgentNeverWrapsWithFourDigitCostOrSavedAmounts(t *testing.T) {
+	d := dashboardData{AgentRows: []dashboardAgentRow{
+		{Agent: "hermes", HitRate: 0.92, Calls: 13_100, CostKnown: true, Cost: 1812.36, Saved: 6769.37},
+	}}
+	r := render.New(render.Options{IsTTY: true, NoColor: true})
+	lines := renderPanelByAgent(d, r, i18n.FR, 200)
+	if len(lines) != 2 {
+		t.Fatalf("renderPanelByAgent() = %v, want exactly 2 lines (header + 1 data row, no wrap)", lines)
+	}
+	joined := strings.Join(lines, "\n")
+	if !strings.Contains(joined, "1812,36 $") {
+		t.Fatalf("renderPanelByAgent() = %q, missing the full cost %q (never wrapped)", joined, "1812,36 $")
+	}
+	if !strings.Contains(joined, "6769,37 $") {
+		t.Fatalf("renderPanelByAgent() = %q, missing the full saved amount %q (never wrapped)", joined, "6769,37 $")
 	}
 }
 

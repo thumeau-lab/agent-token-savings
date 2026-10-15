@@ -1,5 +1,5 @@
 1 [Dashboard]  2 Costs  3 What gets sent  4 Cache lifetime  5 Fix
-ats dev    agent: < claude-code >  (1/1)    window: 7d
+ats dev    agent: < all >    window: 7d
 - cost   - saved via cache   86.8% cache hit rate ╭─ Efficiency ──────────────────────────────────╮
 340 calls · 12 sessions                           │ █▀█ █▀█      Cache hit rate               ##… │
 64.7 M tok read from cache / 9.87 M tok cached /… │ ▀▀█  ▄▀  A-  No abnormal rebuild          ##… │
@@ -21,9 +21,9 @@ ats dev    agent: < claude-code >  (1/1)    window: 7d
 │ Nothing to fix.                               │ │ No per-model detail available.                │
 ╰───────────────────────────────────────────────╯ ╰───────────────────────────────────────────────╯
 ╭─ Measured ────────────────────────────────────╮
-│ claude-code: ~/.claude/projects/*/*.jsonl (l… │
+│ claude-code: ~/.claude/projects/*/*.jsonl     │
+│ (last 7 days, 12 sessions)                    │
 ╰───────────────────────────────────────────────╯
-
 
 
 

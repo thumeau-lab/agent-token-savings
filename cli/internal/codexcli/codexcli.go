@@ -34,6 +34,11 @@ type UsageRow struct {
 	CacheWrite      *int64 // nil when cache_write_input_tokens is absent: never 0.
 	Output          int64
 	ReasoningOutput int64
+	// Model is the model active at the time of this event, from the
+	// most recent "turn_context" line seen before it in the same
+	// rollout file (codex-rs protocol.rs TurnContextItem.model): "" if
+	// no turn_context line has appeared yet, never invented.
+	Model string
 }
 
 // FileResult is one rollout/archived session file's parsed usage rows plus
@@ -55,6 +60,10 @@ type eventMsgLine struct {
 		Info *struct {
 			LastTokenUsage *LastTokenUsage `json:"last_token_usage"`
 		} `json:"info"`
+		// Model is set when Type (outer) == "turn_context": the model
+		// selected for that turn (codex-rs protocol.rs
+		// TurnContextItem.model). Absent/empty on an event_msg line.
+		Model string `json:"model"`
 	} `json:"payload"`
 }
 
@@ -101,6 +110,7 @@ func ParseSessionFile(path string) (FileResult, error) {
 
 	var res FileResult
 	var prev *LastTokenUsage
+	var currentModel string
 	sc := bufio.NewScanner(f)
 	sc.Buffer(make([]byte, 0, 64*1024), 16*1024*1024)
 	for sc.Scan() {
@@ -110,6 +120,12 @@ func ParseSessionFile(path string) (FileResult, error) {
 		}
 		var d eventMsgLine
 		if err := json.Unmarshal(line, &d); err != nil {
+			continue
+		}
+		if d.Type == "turn_context" {
+			if d.Payload.Model != "" {
+				currentModel = d.Payload.Model
+			}
 			continue
 		}
 		if d.Type != "event_msg" {
@@ -130,7 +146,7 @@ func ParseSessionFile(path string) (FileResult, error) {
 			res.Rows = append(res.Rows, UsageRow{
 				Input: u.InputTokens, CachedInput: u.CachedInputTokens,
 				CacheWrite: u.CacheWriteInputTokens, Output: u.OutputTokens,
-				ReasoningOutput: u.ReasoningOutputTokens,
+				ReasoningOutput: u.ReasoningOutputTokens, Model: currentModel,
 			})
 		}
 	}
@@ -191,6 +207,22 @@ type Report struct {
 	// interactive-only sessions (openai/codex#9660) are counted here, not
 	// silently dropped.
 	SessionsWithoutUsage int
+	// ModelBreakdown groups usage by the model active at each event
+	// (see UsageRow.Model, from "turn_context" lines): a model switch
+	// has the same prompt-cache implication as for the other agents
+	// (see cliapp.AgentCacheResult.ModelBreakdown's own doc), so the
+	// Dashboard's "Par modele" panel needs this detail instead of one
+	// blended total. Rows with no model known yet (Model == "") are
+	// excluded here but still counted in Totals above: never silently
+	// dropped from the window's real numbers.
+	ModelBreakdown []ModelUsage
+}
+
+// ModelUsage is one model's aggregated usage across every session.
+type ModelUsage struct {
+	Model  string
+	Calls  int
+	Totals Totals
 }
 
 // Aggregate walks root/sessions/*/*/*/rollout-*.jsonl and every *.jsonl
@@ -203,6 +235,7 @@ func Aggregate(root string) (Report, error) {
 	sort.Strings(paths)
 
 	var rep Report
+	byModel := map[string]*ModelUsage{}
 	for _, p := range paths {
 		fr, err := ParseSessionFile(p)
 		if err != nil {
@@ -221,11 +254,34 @@ func Aggregate(root string) (Report, error) {
 			rep.Totals.ReasoningOutput += row.ReasoningOutput
 			if row.CacheWrite == nil {
 				rep.Totals.CacheWriteUnknown = true
-				continue
+			} else {
+				rep.Totals.CacheWrite += *row.CacheWrite
 			}
-			rep.Totals.CacheWrite += *row.CacheWrite
+			if row.Model != "" {
+				mu := byModel[row.Model]
+				if mu == nil {
+					mu = &ModelUsage{Model: row.Model}
+					byModel[row.Model] = mu
+				}
+				mu.Calls++
+				mu.Totals.Input += row.Input
+				mu.Totals.CachedInput += row.CachedInput
+				mu.Totals.Output += row.Output
+				mu.Totals.ReasoningOutput += row.ReasoningOutput
+				if row.CacheWrite == nil {
+					mu.Totals.CacheWriteUnknown = true
+				} else {
+					mu.Totals.CacheWrite += *row.CacheWrite
+				}
+			}
 		}
 	}
+	for _, mu := range byModel {
+		rep.ModelBreakdown = append(rep.ModelBreakdown, *mu)
+	}
+	sort.Slice(rep.ModelBreakdown, func(i, j int) bool {
+		return rep.ModelBreakdown[i].Model < rep.ModelBreakdown[j].Model
+	})
 	return rep, nil
 }
 

@@ -20,6 +20,25 @@ func TestFormatCountLangEnglishUnchanged(t *testing.T) {
 	}
 }
 
+// TestFormatCountLangFrenchUsesMdForBillionSuffix pins card point 7:
+// French never writes the English "B" (billion) scale letter -- it
+// must read "Md" (milliard). K and M stay unchanged in both locales.
+func TestFormatCountLangFrenchUsesMdForBillionSuffix(t *testing.T) {
+	got := FormatCountLang(1_860_000_000, i18n.FR)
+	if got != "1,86 Md" {
+		t.Fatalf("FormatCountLang(1_860_000_000, fr) = %q, want %q", got, "1,86 Md")
+	}
+}
+
+// TestFormatCountLangEnglishKeepsBForBillion: English is unaffected by
+// the French "Md" substitution.
+func TestFormatCountLangEnglishKeepsBForBillion(t *testing.T) {
+	got := FormatCountLang(1_860_000_000, i18n.EN)
+	if got != "1.86 B" {
+		t.Fatalf("FormatCountLang(1_860_000_000, en) = %q, want %q", got, "1.86 B")
+	}
+}
+
 func TestFormatUSDLangFrenchPutsSignAfterAmount(t *testing.T) {
 	got := FormatUSDLang(110.79, i18n.FR)
 	if got != "110,79 $" {

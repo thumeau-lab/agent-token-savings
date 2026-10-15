@@ -1,5 +1,5 @@
 1 [Tableau de bord]  2 Coûts  3 Contenu envoyé  4 Durée du cache  5 Corriger
-ats dev    agent : < claude-code >  (1/4)    fenêtre : 7 j    mis à jour il y a 0s
+ats dev    agent : < tous >    fenêtre : 7 j    mis à jour il y a 0s
 126,70 $ coût   359,86 $ économisé grâce au cach… ╭─ Efficacité ──────────────────────────────────╮
 1,35 K appels · 65 sessions                       │ ▀▀█ █▀█      Taux de cache                ##… │
 Hier 12,00 $   Moy. 7 jours 12,27 $   vs hier -4… │   █ █▀█  C+  Sans reconstruction anormale ##… │
@@ -23,8 +23,8 @@ Hier 12,00 $   Moy. 7 jours 12,27 $   vs hier -4… │   █ █▀█  C+  San
 │ Reconstructions anormales (clau…   0,64 $ [2] │ ╰───────────────────────────────────────────────╯
 ╰───────────────────────────────────────────────╯
 ╭─ Mesuré ──────────────────────────────────────╮
-│ claude-code: ~/.claude/projects/*/*.jsonl (7… │
-│ hermes: ~/.hermes/state.db (7 derniers jours… │
-│ copilot: ~/.copilot/session-store.db (7 dern… │
-│   prix inconnu pour ce modèle                 │
+│ claude-code: ~/.claude/projects/*/*.jsonl (7  │
+│ derniers jours, 12 sessions)                  │
+│ hermes: ~/.hermes/state.db (7 derniers jours, │
+│ 40 sessions)                                  │
 q quitter • ←/→ période • p agent • tab/1-5 changer de vue • ? aide complète • L langue

@@ -160,6 +160,40 @@ func claudeModelBreakdown(models []claudecode.ModelUsage) []ModelUsageJSON {
 	return out
 }
 
+// hermesModelBreakdown converts hermesusage.QueryByModel's per-model
+// totals (the sessions table's own `model` column) into the cache
+// card's ModelUsageJSON rows, same shape every other agent's
+// per-model table uses.
+func hermesModelBreakdown(models []hermesusage.ModelUsage) []ModelUsageJSON {
+	out := make([]ModelUsageJSON, 0, len(models))
+	for _, m := range models {
+		out = append(out, ModelUsageJSON{
+			Model: m.Model, Calls: m.Calls,
+			InputTokens: m.Input, OutputTokens: m.Output,
+			CacheReadTokens: m.CacheRead, CacheWriteTokens: m.CacheWrite,
+			HitRate: m.HitRate(),
+		})
+	}
+	return out
+}
+
+// codexModelBreakdown converts codexcli.Report's per-model totals
+// (grouped from each rollout file's "turn_context" lines) into the
+// cache card's ModelUsageJSON rows, same shape every other agent's
+// per-model table uses.
+func codexModelBreakdown(models []codexcli.ModelUsage) []ModelUsageJSON {
+	out := make([]ModelUsageJSON, 0, len(models))
+	for _, m := range models {
+		out = append(out, ModelUsageJSON{
+			Model: m.Model, Calls: int64(m.Calls),
+			InputTokens: m.Totals.Uncached(), OutputTokens: m.Totals.Output,
+			CacheReadTokens: m.Totals.CachedInput, CacheWriteTokens: m.Totals.CacheWrite,
+			HitRate: m.Totals.HitRate(),
+		})
+	}
+	return out
+}
+
 // codexCacheResult builds the AgentCacheResult for codex from
 // codexcli.Aggregate's Report: no pricing table entry exists for OpenAI
 // model names yet, so CostUnknown is always set (the card: show tokens
@@ -174,6 +208,7 @@ func codexCacheResult(k agents.Kind, days int, rep codexcli.Report) AgentCacheRe
 		HitRate:              rep.Totals.HitRate(),
 		SessionsWithoutUsage: int64(rep.SessionsWithoutUsage),
 		CostUnknown:          true,
+		ModelBreakdown:       codexModelBreakdown(rep.ModelBreakdown),
 	}
 }
 
@@ -265,11 +300,19 @@ func collectCache(roots agents.Roots, agentFilter string, days int, lang i18n.La
 				continue
 			}
 			s := hermesusage.Summarize(rows)
+			// QueryByModel reads the sessions table's own `model`
+			// column (card: "Hermes state.db sessions carry the
+			// model"): its own error is never fatal to the agent's
+			// whole result -- an older/custom schema without that
+			// column just means no per-model breakdown, same as any
+			// other agent with ModelBreakdown left empty.
+			models, _ := hermesusage.QueryByModel(filepath.Join(roots.HermesHome, "state.db"), days)
 			out = append(out, AgentCacheResult{
 				Agent: string(k), Days: days, Sessions: s.Sessions, Calls: s.Calls,
 				CacheWriteTokens: s.CacheWrite, CacheReadTokens: s.CacheRead,
 				InputTokens: s.Input, OutputTokens: s.Output,
 				HitRate: s.HitRate, USD: s.USD, USDShare: s.USDShare,
+				ModelBreakdown: hermesModelBreakdown(models),
 			})
 		case agents.Codex:
 			if !roots.CodexHasData() {

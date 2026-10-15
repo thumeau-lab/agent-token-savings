@@ -17,6 +17,13 @@ var catalog = map[string]map[Lang]string{
 	"tui.no_agents":         {EN: "no agents detected", FR: "aucun agent détecté"},
 	"tui.no_agents_locally": {EN: "no agents detected locally", FR: "aucun agent détecté localement"},
 	"tui.agent_label":       {EN: "agent: < %s >  (%d/%d)", FR: "agent : < %s >  (%d/%d)"},
+	// tui.agent_label_all is shown on the Dashboard tab instead of
+	// tui.agent_label whenever the dashboard is scoped to every
+	// detected agent combined (card point 3: pressing "p" alone cycles
+	// which agent "a" would scope to, but changes nothing on the
+	// Dashboard by itself -- showing the cycled agent's name there was
+	// misleading since the dashboard was not actually filtered to it).
+	"tui.agent_label_all":   {EN: "agent: < all >", FR: "agent : < tous >"},
 	"tui.skipped_prefix":    {EN: "skipped: %s", FR: "ignorés : %s"},
 	"tui.no_data":           {EN: "%s: no data", FR: "%s : aucune donnée"},
 	"tui.updated_ago":       {EN: "updated %s ago", FR: "mis à jour il y a %s"},
@@ -36,7 +43,7 @@ var catalog = map[string]map[Lang]string{
 	"key.switch_tab":   {EN: "switch view", FR: "changer de vue"},
 	"key.switch_agent": {EN: "agent", FR: "agent"},
 	"key.period":       {EN: "period", FR: "période"},
-	"key.toggle_scope": {EN: "all/one agent", FR: "tous/un agent"},
+	"key.toggle_scope": {EN: "dashboard: all/one agent", FR: "tableau de bord : tous/un agent"},
 	"key.reload":       {EN: "reload", FR: "recharger"},
 	"key.scroll":       {EN: "scroll", FR: "défiler"},
 	"key.confirm":      {EN: "apply fix", FR: "appliquer le correctif"},

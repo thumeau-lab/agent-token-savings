@@ -19,7 +19,13 @@ func FormatCountLang(n int64, lang i18n.Lang) string {
 	if lang != i18n.FR {
 		return s
 	}
-	return strings.Replace(s, ".", ",", 1)
+	s = strings.Replace(s, ".", ",", 1)
+	// French never uses the English "B" (billion) scale letter: it
+	// reads "Md" (milliard). K and M stay the same in both locales.
+	if strings.HasSuffix(s, " B") {
+		s = strings.TrimSuffix(s, " B") + " Md"
+	}
+	return s
 }
 
 // FormatUSDLang is FormatUSD, localized: French writes the amount with a

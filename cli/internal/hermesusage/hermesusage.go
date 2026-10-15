@@ -95,6 +95,67 @@ func Summarize(rows []DailyRow) Summary {
 	return s
 }
 
+// ModelUsage is one model's aggregated usage from the sessions table's
+// own `model` column (card: "Hermes state.db sessions carry the
+// model"), the Dashboard's "Par modele" panel's missing Hermes rows.
+type ModelUsage struct {
+	Model      string
+	Sessions   int64
+	Calls      int64
+	Input      int64
+	Output     int64
+	CacheRead  int64
+	CacheWrite int64
+}
+
+// HitRate is CacheRead / (CacheRead + CacheWrite), the same formula
+// every other agent's per-model row uses, 0 when there is nothing to
+// divide.
+func (m ModelUsage) HitRate() float64 {
+	denom := m.CacheRead + m.CacheWrite
+	if denom == 0 {
+		return 0
+	}
+	return float64(m.CacheRead) / float64(denom)
+}
+
+// QueryByModel groups sessions by their `model` column for the last
+// `days` days, mirroring QueryDaily's own window. A NULL or empty
+// model (older/edge-case rows) is excluded, never grouped under an
+// invented label.
+func QueryByModel(dbPath string, days int) ([]ModelUsage, error) {
+	db, err := sql.Open("sqlite", "file:"+dbPath+"?mode=ro")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	const q = `
+SELECT model, count(*) n, sum(api_call_count) calls, sum(input_tokens) in_t, sum(output_tokens) out_t,
+       sum(cache_read_tokens) cr, sum(cache_write_tokens) cw
+FROM sessions WHERE started_at > unixepoch('now', ?) AND model IS NOT NULL AND model != ''
+GROUP BY model ORDER BY model`
+
+	win := "-" + strconv.Itoa(days) + " days"
+	rows, err := db.Query(q, win)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []ModelUsage
+	for rows.Next() {
+		var m ModelUsage
+		var calls, inT, outT, cr, cw sql.NullInt64
+		if err := rows.Scan(&m.Model, &m.Sessions, &calls, &inT, &outT, &cr, &cw); err != nil {
+			return nil, err
+		}
+		m.Calls, m.Input, m.Output, m.CacheRead, m.CacheWrite = calls.Int64, inT.Int64, outT.Int64, cr.Int64, cw.Int64
+		out = append(out, m)
+	}
+	return out, rows.Err()
+}
+
 // QueryDaily reads daily aggregates from a Hermes state.db for the last
 // `days` days, mirroring hermes_usage.py's DAILY query. The db is opened
 // read-only; ats never writes to an agent's own state database.

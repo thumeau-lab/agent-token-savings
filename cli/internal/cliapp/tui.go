@@ -934,7 +934,11 @@ func (m tuiModel) renderHeader() string {
 
 	agentLabel := i18n.T(m.lang, "tui.no_agents")
 	if kind, ok := m.currentAgent(); ok {
-		agentLabel = i18n.T(m.lang, "tui.agent_label", kind, m.agentIdx+1, len(m.detected))
+		if m.tab == tabDashboard && m.allAgents {
+			agentLabel = i18n.T(m.lang, "tui.agent_label_all")
+		} else {
+			agentLabel = i18n.T(m.lang, "tui.agent_label", kind, m.agentIdx+1, len(m.detected))
+		}
 	}
 	days := windowDays[m.dayIdx]
 	title := i18n.T(m.lang, "tui.header_title", Version)
